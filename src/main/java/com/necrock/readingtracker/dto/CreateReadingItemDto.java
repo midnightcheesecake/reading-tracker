@@ -1,18 +1,26 @@
 package com.necrock.readingtracker.dto;
 
+import com.necrock.readingtracker.models.ReadingItemType;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PositiveOrZero;
 
 public class CreateReadingItemDto {
+
     @NotBlank(message = "Title is required")
     private final String title;
 
-    private final String type;
+    @NotNull(message = "Type is required")
+    private final ReadingItemType type;
 
+    @NotBlank(message = "Author is required")
     private final String author;
 
+    @NotNull(message = "Number of chapters is required")
+    @PositiveOrZero(message = "Number of chapters can not be negative")
     private final Integer numberChapters;
 
-    private CreateReadingItemDto(String title, String type, String author, Integer numberChapters) {
+    private CreateReadingItemDto(String title, ReadingItemType type, String author, Integer numberChapters) {
         this.title = title;
         this.type = type;
         this.author = author;
@@ -27,7 +35,7 @@ public class CreateReadingItemDto {
         return title;
     }
 
-    public String getType() {
+    public ReadingItemType getType() {
         return type;
     }
 
@@ -43,7 +51,7 @@ public class CreateReadingItemDto {
 
         private String title;
 
-        private String type;
+        private ReadingItemType type;
 
         private String author;
 
@@ -56,7 +64,7 @@ public class CreateReadingItemDto {
             return this;
         }
 
-        public Builder type(String type) {
+        public Builder type(ReadingItemType type) {
             this.type = type;
             return this;
         }

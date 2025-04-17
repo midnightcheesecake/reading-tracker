@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
+import static com.necrock.readingtracker.models.ReadingItemType.BOOK;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
@@ -27,8 +28,8 @@ class ReadingItemServiceTest {
 
     @Test
     void getAllReadingItems_returnsAllItems() {
-        ReadingItem item1 = ReadingItem.builder().id(1L).title("Book 1").type("book").build();
-        ReadingItem item2 = ReadingItem.builder().id(2L).title("Book 2").type("book").build();
+        ReadingItem item1 = ReadingItem.builder().id(1L).title("Book 1").type(BOOK).build();
+        ReadingItem item2 = ReadingItem.builder().id(2L).title("Book 2").type(BOOK).build();
         when(repository.findAll()).thenReturn(ImmutableList.of(item1, item2));
 
         var result = service.getAllReadingItems();
@@ -38,7 +39,7 @@ class ReadingItemServiceTest {
 
     @Test
     void addReadingItem_savesItem() {
-        ReadingItem toSave = ReadingItem.builder().title("New Book").type("book").build();
+        ReadingItem toSave = ReadingItem.builder().title("New Book").type(BOOK).build();
 
         var unused = service.addReadingItem(toSave);
 
@@ -51,7 +52,7 @@ class ReadingItemServiceTest {
     void addReadingItem_returnsSavedItem() {
         var newId = 42L;
         var title = "New Book";
-        var type = "book";
+        var type = BOOK;
         ReadingItem toSave = ReadingItem.builder().title(title).type(type).build();
         ReadingItem saved = ReadingItem.builder().id(newId).title(title).type(type).build();
         when(repository.save(any(ReadingItem.class))).thenReturn(saved);

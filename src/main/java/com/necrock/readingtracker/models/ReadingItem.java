@@ -18,7 +18,7 @@ public class ReadingItem {
 
     private String title;
 
-    private String type;
+    private ReadingItemType type;
 
     private String author;
 
@@ -26,7 +26,7 @@ public class ReadingItem {
 
     private Instant createdAt;
 
-    private ReadingItem(Long id, String title, String type, String author, Integer numberChapters) {
+    private ReadingItem(Long id, String title, ReadingItemType type, String author, Integer numberChapters) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -54,7 +54,7 @@ public class ReadingItem {
         return title;
     }
 
-    public String getType() {
+    public ReadingItemType getType() {
         return type;
     }
 
@@ -74,8 +74,11 @@ public class ReadingItem {
         private Long id;
 
         private String title;
-        private String type;
+
+        private ReadingItemType type;
+
         private String author;
+
         private Integer numberChapters;
 
         public Builder id(Long id) {
@@ -88,7 +91,7 @@ public class ReadingItem {
             return this;
         }
 
-        public Builder type(String type) {
+        public Builder type(ReadingItemType type) {
             this.type = type;
             return this;
         }

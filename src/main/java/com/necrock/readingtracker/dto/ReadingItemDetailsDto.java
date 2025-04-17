@@ -1,5 +1,6 @@
 package com.necrock.readingtracker.dto;
 
+import com.necrock.readingtracker.models.ReadingItemType;
 import jakarta.validation.constraints.NotBlank;
 
 public class ReadingItemDetailsDto {
@@ -9,13 +10,13 @@ public class ReadingItemDetailsDto {
     @NotBlank(message = "Title is required")
     private final String title;
 
-    private final String type;
+    private final ReadingItemType type;
 
     private final String author;
 
     private final Integer numberChapters;
 
-    private ReadingItemDetailsDto(Long id, String title, String type, String author, Integer numberChapters) {
+    private ReadingItemDetailsDto(Long id, String title, ReadingItemType type, String author, Integer numberChapters) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -35,7 +36,7 @@ public class ReadingItemDetailsDto {
         return title;
     }
 
-    public String getType() {
+    public ReadingItemType getType() {
         return type;
     }
 
@@ -53,7 +54,7 @@ public class ReadingItemDetailsDto {
 
         private String title;
 
-        private String type;
+        private ReadingItemType type;
 
         private String author;
 
@@ -71,7 +72,7 @@ public class ReadingItemDetailsDto {
             return this;
         }
 
-        public Builder type(String type) {
+        public Builder type(ReadingItemType type) {
             this.type = type;
             return this;
         }

@@ -1,6 +1,7 @@
 package com.necrock.readingtracker.repository;
 
 import com.necrock.readingtracker.models.ReadingItem;
+import com.necrock.readingtracker.models.ReadingItemType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -27,7 +28,7 @@ class ReadingItemRepositoryTest {
     void save_withReadingItem_keepsNonIdFields() {
         var title = "title";
         var author = "author";
-        var type = "book";
+        var type = ReadingItemType.BOOK;
         var numChapters = 6;
         ReadingItem readingItem =
                 ReadingItem.builder().title(title).author(author).type(type).numberChapters(numChapters).build();
@@ -62,7 +63,7 @@ class ReadingItemRepositoryTest {
     void findById_withSavedReadingItemId_returnsReadingItem() {
         var title = "title";
         var author = "author";
-        var type = "book";
+        var type = ReadingItemType.BOOK;
         var numChapters = 6;
         ReadingItem readingItem =
                 ReadingItem.builder().title(title).author(author).type(type).numberChapters(numChapters).build();

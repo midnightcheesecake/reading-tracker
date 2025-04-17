@@ -30,7 +30,7 @@ public class ReadingItemController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public ReadingItemDetailsDto addItem(@RequestBody @Valid CreateReadingItemDto item) {
+    public ReadingItemDetailsDto addItem(@Valid @RequestBody CreateReadingItemDto item) {
         return mapper.toDetailsDto(
                 service.addReadingItem(
                         mapper.toEntity(item)));
