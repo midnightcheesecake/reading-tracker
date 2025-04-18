@@ -1,4 +1,4 @@
-package com.necrock.readingtracker.service;
+package com.necrock.readingtracker.exception;
 
 import org.springframework.web.bind.annotation.ResponseStatus;
 

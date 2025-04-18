@@ -1,9 +1,9 @@
-package com.necrock.readingtracker.mapper;
+package com.necrock.readingtracker.readingitem.api;
 
-import com.necrock.readingtracker.dto.CreateReadingItemDto;
-import com.necrock.readingtracker.dto.ReadingItemDetailsDto;
-import com.necrock.readingtracker.dto.UpdateReadingItemDto;
-import com.necrock.readingtracker.models.ReadingItem;
+import com.necrock.readingtracker.readingitem.api.dto.CreateReadingItemDto;
+import com.necrock.readingtracker.readingitem.api.dto.ReadingItemDetailsDto;
+import com.necrock.readingtracker.readingitem.api.dto.UpdateReadingItemDto;
+import com.necrock.readingtracker.readingitem.persistence.ReadingItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 

@@ -1,7 +1,5 @@
-package com.necrock.readingtracker.repository;
+package com.necrock.readingtracker.readingitem.persistence;
 
-import com.necrock.readingtracker.models.ReadingItem;
-import com.necrock.readingtracker.models.ReadingItemType;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;

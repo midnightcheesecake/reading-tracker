@@ -1,11 +1,10 @@
-package com.necrock.readingtracker.controller;
+package com.necrock.readingtracker.readingitem.api;
 
 import com.google.common.collect.ImmutableList;
-import com.necrock.readingtracker.dto.CreateReadingItemDto;
-import com.necrock.readingtracker.dto.ReadingItemDetailsDto;
-import com.necrock.readingtracker.dto.UpdateReadingItemDto;
-import com.necrock.readingtracker.mapper.ReadingItemMapper;
-import com.necrock.readingtracker.service.ReadingItemService;
+import com.necrock.readingtracker.readingitem.api.dto.CreateReadingItemDto;
+import com.necrock.readingtracker.readingitem.api.dto.ReadingItemDetailsDto;
+import com.necrock.readingtracker.readingitem.api.dto.UpdateReadingItemDto;
+import com.necrock.readingtracker.readingitem.service.ReadingItemService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;

@@ -1,4 +1,4 @@
-package com.necrock.readingtracker.models;
+package com.necrock.readingtracker.readingitem.persistence;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

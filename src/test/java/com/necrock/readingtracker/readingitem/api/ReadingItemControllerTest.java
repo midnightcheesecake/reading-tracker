@@ -1,4 +1,4 @@
-package com.necrock.readingtracker.controller;
+package com.necrock.readingtracker.readingitem.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.JsonPath;

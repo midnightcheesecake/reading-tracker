@@ -1,6 +1,6 @@
-package com.necrock.readingtracker.api.error;
+package com.necrock.readingtracker.exception.handler;
 
-import com.necrock.readingtracker.service.NotFoundException;
+import com.necrock.readingtracker.exception.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,9 +9,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
-import static com.necrock.readingtracker.api.error.ErrorType.INTERNAL_ERROR;
-import static com.necrock.readingtracker.api.error.ErrorType.NOT_FOUND_ERROR;
-import static com.necrock.readingtracker.api.error.ErrorType.VALIDATION_ERROR;
+import static com.necrock.readingtracker.exception.handler.ErrorType.INTERNAL_ERROR;
+import static com.necrock.readingtracker.exception.handler.ErrorType.NOT_FOUND_ERROR;
+import static com.necrock.readingtracker.exception.handler.ErrorType.VALIDATION_ERROR;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;

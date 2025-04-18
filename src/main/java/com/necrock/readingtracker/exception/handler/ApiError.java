@@ -1,4 +1,4 @@
-package com.necrock.readingtracker.api.error;
+package com.necrock.readingtracker.exception.handler;
 
 import com.google.common.collect.ImmutableMap;
 import org.springframework.lang.NonNull;

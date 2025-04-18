@@ -1,19 +1,23 @@
-package com.necrock.readingtracker.service;
+package com.necrock.readingtracker.readingitem.service;
 
 import com.google.common.collect.ImmutableList;
-import com.necrock.readingtracker.models.ReadingItem;
-import com.necrock.readingtracker.repository.ReadingItemRepository;
+import com.necrock.readingtracker.readingitem.persistence.ReadingItem;
+import com.necrock.readingtracker.readingitem.persistence.ReadingItemRepository;
+import com.necrock.readingtracker.exception.NotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.time.Clock;
 import java.time.Instant;
 
 @Service
 public class ReadingItemService {
 
     private final ReadingItemRepository repository;
+    private final Clock clock;
 
-    public ReadingItemService(ReadingItemRepository repository) {
+    public ReadingItemService(ReadingItemRepository repository, Clock clock) {
         this.repository = repository;
+        this.clock = clock;
     }
 
     public ImmutableList<ReadingItem> getAllReadingItems() {
@@ -21,7 +25,7 @@ public class ReadingItemService {
     }
 
     public ReadingItem addReadingItem(ReadingItem item) {
-        var itemWithDate = item.toBuilder().createdAt(Instant.now()).build();
+        var itemWithDate = item.toBuilder().createdAt(Instant.now(clock)).build();
         return repository.save(itemWithDate);
     }
 

@@ -1,4 +1,4 @@
-package com.necrock.readingtracker.api.error;
+package com.necrock.readingtracker.exception.handler;
 
 public enum ErrorType {
     INTERNAL_ERROR,

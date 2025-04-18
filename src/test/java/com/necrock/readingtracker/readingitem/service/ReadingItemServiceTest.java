@@ -1,18 +1,22 @@
-package com.necrock.readingtracker.service;
+package com.necrock.readingtracker.readingitem.service;
 
 import com.google.common.collect.ImmutableList;
-import com.necrock.readingtracker.models.ReadingItem;
-import com.necrock.readingtracker.repository.ReadingItemRepository;
+import com.necrock.readingtracker.configuration.TestTimeConfig;
+import com.necrock.readingtracker.configuration.TimeConfig;
+import com.necrock.readingtracker.exception.NotFoundException;
+import com.necrock.readingtracker.readingitem.persistence.ReadingItem;
+import com.necrock.readingtracker.readingitem.persistence.ReadingItemRepository;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Optional;
 
-import static com.necrock.readingtracker.models.ReadingItemType.ARTICLE;
-import static com.necrock.readingtracker.models.ReadingItemType.BOOK;
+import static com.necrock.readingtracker.readingitem.persistence.ReadingItemType.ARTICLE;
+import static com.necrock.readingtracker.readingitem.persistence.ReadingItemType.BOOK;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
@@ -20,7 +24,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-
+@Import(TestTimeConfig.class)
 @SpringBootTest
 class ReadingItemServiceTest {
 
@@ -42,7 +46,7 @@ class ReadingItemServiceTest {
     }
 
     @Test
-    void addReadingItem_savesItem() {
+    void addReadingItem_savesItemWithGivenFields() {
         ReadingItem toSave = ReadingItem.builder().title("New Book").type(BOOK).build();
 
         service.addReadingItem(toSave);
@@ -50,6 +54,17 @@ class ReadingItemServiceTest {
         var captor = ArgumentCaptor.forClass(ReadingItem.class);
         verify(repository, times(1)).save(captor.capture());
         assertThat(captor.getValue()).usingRecursiveComparison().ignoringFields("createdAt").isEqualTo(toSave);
+    }
+
+    @Test
+    void addReadingItem_setsCreationTime() {
+        ReadingItem toSave = ReadingItem.builder().title("New Book").type(BOOK).build();
+
+        service.addReadingItem(toSave);
+
+        var captor = ArgumentCaptor.forClass(ReadingItem.class);
+        verify(repository, times(1)).save(captor.capture());
+        assertThat(captor.getValue().getCreatedAt()).isEqualTo(TestTimeConfig.NOW);
     }
 
     @Test

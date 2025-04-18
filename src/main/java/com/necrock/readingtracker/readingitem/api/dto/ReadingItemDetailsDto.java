@@ -1,25 +1,23 @@
-package com.necrock.readingtracker.dto;
+package com.necrock.readingtracker.readingitem.api.dto;
 
-import com.necrock.readingtracker.models.ReadingItemType;
+import com.necrock.readingtracker.readingitem.persistence.ReadingItemType;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.PositiveOrZero;
 
-public class CreateReadingItemDto {
+public class ReadingItemDetailsDto {
+
+    private final Long id;
 
     @NotBlank(message = "Title is required")
     private final String title;
 
-    @NotNull(message = "Type is required")
     private final ReadingItemType type;
 
-    @NotBlank(message = "Author is required")
     private final String author;
 
-    @PositiveOrZero(message = "Number of chapters can not be negative")
     private final Integer numberChapters;
 
-    private CreateReadingItemDto(String title, ReadingItemType type, String author, Integer numberChapters) {
+    private ReadingItemDetailsDto(Long id, String title, ReadingItemType type, String author, Integer numberChapters) {
+        this.id = id;
         this.title = title;
         this.type = type;
         this.author = author;
@@ -28,6 +26,10 @@ public class CreateReadingItemDto {
 
     public static Builder builder() {
         return new Builder();
+    }
+
+    public Long getId() {
+        return id;
     }
 
     public String getTitle() {
@@ -48,6 +50,8 @@ public class CreateReadingItemDto {
 
     public static class Builder {
 
+        private Long id;
+
         private String title;
 
         private ReadingItemType type;
@@ -57,6 +61,11 @@ public class CreateReadingItemDto {
         private Integer numberChapters;
 
         private Builder() {}
+
+        public Builder id(Long id) {
+            this.id = id;
+            return this;
+        }
 
         public Builder title(String title) {
             this.title = title;
@@ -78,8 +87,8 @@ public class CreateReadingItemDto {
             return this;
         }
 
-        public CreateReadingItemDto build() {
-            return new CreateReadingItemDto(title, type, author, numberChapters);
+        public ReadingItemDetailsDto build() {
+            return new ReadingItemDetailsDto(id, title, type, author, numberChapters);
         }
     }
 }

@@ -1,23 +1,20 @@
-package com.necrock.readingtracker.dto;
+package com.necrock.readingtracker.readingitem.api.dto;
 
-import com.necrock.readingtracker.models.ReadingItemType;
-import jakarta.validation.constraints.NotBlank;
+import com.necrock.readingtracker.readingitem.persistence.ReadingItemType;
+import jakarta.validation.constraints.PositiveOrZero;
 
-public class ReadingItemDetailsDto {
+public class UpdateReadingItemDto {
 
-    private final Long id;
-
-    @NotBlank(message = "Title is required")
     private final String title;
 
     private final ReadingItemType type;
 
     private final String author;
 
+    @PositiveOrZero(message = "Number of chapters can not be negative")
     private final Integer numberChapters;
 
-    private ReadingItemDetailsDto(Long id, String title, ReadingItemType type, String author, Integer numberChapters) {
-        this.id = id;
+    private UpdateReadingItemDto(String title, ReadingItemType type, String author, Integer numberChapters) {
         this.title = title;
         this.type = type;
         this.author = author;
@@ -26,10 +23,6 @@ public class ReadingItemDetailsDto {
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    public Long getId() {
-        return id;
     }
 
     public String getTitle() {
@@ -50,8 +43,6 @@ public class ReadingItemDetailsDto {
 
     public static class Builder {
 
-        private Long id;
-
         private String title;
 
         private ReadingItemType type;
@@ -61,11 +52,6 @@ public class ReadingItemDetailsDto {
         private Integer numberChapters;
 
         private Builder() {}
-
-        public Builder id(Long id) {
-            this.id = id;
-            return this;
-        }
 
         public Builder title(String title) {
             this.title = title;
@@ -87,8 +73,8 @@ public class ReadingItemDetailsDto {
             return this;
         }
 
-        public ReadingItemDetailsDto build() {
-            return new ReadingItemDetailsDto(id, title, type, author, numberChapters);
+        public UpdateReadingItemDto build() {
+            return new UpdateReadingItemDto(title, type, author, numberChapters);
         }
     }
 }
