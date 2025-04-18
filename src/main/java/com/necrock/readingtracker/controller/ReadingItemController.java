@@ -3,10 +3,14 @@ package com.necrock.readingtracker.controller;
 import com.google.common.collect.ImmutableList;
 import com.necrock.readingtracker.dto.CreateReadingItemDto;
 import com.necrock.readingtracker.dto.ReadingItemDetailsDto;
+import com.necrock.readingtracker.dto.UpdateReadingItemDto;
 import com.necrock.readingtracker.mapper.ReadingItemMapper;
 import com.necrock.readingtracker.service.ReadingItemService;
 import jakarta.validation.Valid;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import static com.google.common.collect.ImmutableList.toImmutableList;
 import static org.springframework.http.HttpStatus.CREATED;
+import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @RestController
 @RequestMapping("api/items")
@@ -28,18 +33,32 @@ public class ReadingItemController {
         this.mapper = mapper;
     }
 
-    @PostMapping
-    @ResponseStatus(CREATED)
-    public ReadingItemDetailsDto addItem(@Valid @RequestBody CreateReadingItemDto item) {
-        return mapper.toDetailsDto(
-                service.addReadingItem(
-                        mapper.toEntity(item)));
-    }
-
     @GetMapping
     public ImmutableList<ReadingItemDetailsDto> getAllItems() {
         return service.getAllReadingItems().stream()
                 .map(mapper::toDetailsDto)
                 .collect(toImmutableList());
+    }
+
+    @PostMapping
+    @ResponseStatus(CREATED)
+    public ReadingItemDetailsDto addItem(@Valid @RequestBody CreateReadingItemDto item) {
+        return mapper.toDetailsDto(service.addReadingItem(mapper.toEntity(item)));
+    }
+
+    @PatchMapping("/{id}")
+    public ReadingItemDetailsDto updateItem(@PathVariable Long id, @Valid @RequestBody UpdateReadingItemDto item) {
+        return mapper.toDetailsDto(service.updateReadingItem(id, mapper.toEntity(item)));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void deleteItem(@PathVariable Long id) {
+        service.deleteReadingItem(id);
+    }
+
+    @GetMapping("/{id}")
+    public ReadingItemDetailsDto getItem(@PathVariable Long id) {
+        return mapper.toDetailsDto(service.getReadingItem(id));
     }
 }

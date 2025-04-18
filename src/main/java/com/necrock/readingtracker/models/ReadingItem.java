@@ -4,7 +4,8 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
-import org.joda.time.Instant;
+
+import java.time.Instant;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -26,17 +27,23 @@ public class ReadingItem {
 
     private Instant createdAt;
 
-    private ReadingItem(Long id, String title, ReadingItemType type, String author, Integer numberChapters) {
+    private ReadingItem(Long id,
+                        String title,
+                        ReadingItemType type,
+                        String author,
+                        Integer numberChapters,
+                        Instant createdAt) {
         this.id = id;
         this.title = title;
         this.type = type;
         this.author = author;
         this.numberChapters = numberChapters;
-        this.createdAt = Instant.now();
+        this.createdAt = createdAt;
     }
 
     // Required for JPA
-    protected ReadingItem() {}
+    protected ReadingItem() {
+    }
 
     public static Builder builder() {
         return new Builder();
@@ -70,6 +77,16 @@ public class ReadingItem {
         return createdAt;
     }
 
+    public Builder toBuilder() {
+        return builder()
+                .id(id)
+                .title(title)
+                .type(type)
+                .author(author)
+                .numberChapters(numberChapters)
+                .createdAt(createdAt);
+    }
+
     public static class Builder {
         private Long id;
 
@@ -80,6 +97,8 @@ public class ReadingItem {
         private String author;
 
         private Integer numberChapters;
+
+        private Instant createdAt;
 
         public Builder id(Long id) {
             this.id = id;
@@ -106,8 +125,13 @@ public class ReadingItem {
             return this;
         }
 
+        public Builder createdAt(Instant createdAt) {
+            this.createdAt = createdAt;
+            return this;
+        }
+
         public ReadingItem build() {
-            return new ReadingItem(id, title, type, author, numberChapters);
+            return new ReadingItem(id, title, type, author, numberChapters, createdAt);
         }
     }
 }
