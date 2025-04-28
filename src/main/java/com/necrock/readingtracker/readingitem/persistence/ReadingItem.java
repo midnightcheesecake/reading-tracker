@@ -1,6 +1,8 @@
 package com.necrock.readingtracker.readingitem.persistence;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
@@ -60,6 +62,7 @@ public class ReadingItem {
         return title;
     }
 
+    @Enumerated(EnumType.STRING)
     public ReadingItemType getType() {
         return type;
     }
