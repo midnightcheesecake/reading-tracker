@@ -1,16 +1,25 @@
 package com.necrock.readingtracker.readingitem.persistence;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 @DataJpaTest
 class ReadingItemRepositoryTest {
 
     @Autowired
     private ReadingItemRepository repository;
+
+    @BeforeEach
+    void setUp() {
+        repository.deleteAll();
+    }
 
     @Test
     void save_withReadingItem_setsIdField() {
@@ -57,6 +66,7 @@ class ReadingItemRepositoryTest {
         assertThat(notFoundItem).isEmpty();
     }
 
+    @SuppressWarnings("ConstantConditions") // Asserting foundItem is not null before checking fields
     @Test
     void findById_withSavedReadingItemId_returnsReadingItem() {
         var title = "title";

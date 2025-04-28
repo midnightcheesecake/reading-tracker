@@ -41,9 +41,8 @@ public class ReadingItem {
         this.createdAt = createdAt;
     }
 
-    // Required for JPA
-    protected ReadingItem() {
-    }
+    @SuppressWarnings("unused") // Required for JPA
+    protected ReadingItem() {}
 
     public static Builder builder() {
         return new Builder();
