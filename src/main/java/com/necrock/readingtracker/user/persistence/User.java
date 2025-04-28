@@ -97,6 +97,7 @@ public class User {
                 .email(email)
                 .passwordHash(passwordHash)
                 .role(role)
+                .status(status)
                 .createdAt(createdAt);
     }
 

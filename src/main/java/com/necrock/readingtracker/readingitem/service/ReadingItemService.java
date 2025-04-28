@@ -25,13 +25,14 @@ public class ReadingItemService {
     }
 
     public ReadingItem addReadingItem(ReadingItem item) {
-        var itemWithDate = item.toBuilder().createdAt(Instant.now(clock)).build();
-        return repository.save(itemWithDate);
+        var enrichedReadingItem = item.toBuilder().createdAt(Instant.now(clock)).build();
+        return repository.save(enrichedReadingItem);
     }
 
     public ReadingItem updateReadingItem(long id, ReadingItem item) {
         var existingItem = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("No reading item with id %d", id)));
+
         var updatedItemBuilder = existingItem.toBuilder();
         if (item.getTitle() != null) {
             updatedItemBuilder.title(item.getTitle());
@@ -45,6 +46,7 @@ public class ReadingItemService {
         if (item.getNumberChapters() != null) {
             updatedItemBuilder.numberChapters(item.getNumberChapters());
         }
+
         return repository.save(updatedItemBuilder.build());
     }
 

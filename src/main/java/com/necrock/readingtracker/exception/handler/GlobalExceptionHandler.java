@@ -1,5 +1,6 @@
 package com.necrock.readingtracker.exception.handler;
 
+import com.necrock.readingtracker.exception.AlreadyExistsException;
 import com.necrock.readingtracker.exception.NotFoundException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -9,10 +10,12 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import java.util.HashMap;
 import java.util.Map;
 
+import static com.necrock.readingtracker.exception.handler.ErrorType.ALREADY_EXISTS_ERROR;
 import static com.necrock.readingtracker.exception.handler.ErrorType.INTERNAL_ERROR;
 import static com.necrock.readingtracker.exception.handler.ErrorType.NOT_FOUND_ERROR;
 import static com.necrock.readingtracker.exception.handler.ErrorType.VALIDATION_ERROR;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -35,6 +38,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleNotFound(NotFoundException ex) {
         var apiError = new ApiError(NOT_FOUND_ERROR, ex.getMessage());
         return ResponseEntity.status(NOT_FOUND).body(apiError);
+    }
+
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleAlreadyExists(AlreadyExistsException ex) {
+        var apiError = new ApiError(ALREADY_EXISTS_ERROR, ex.getMessage());
+        return ResponseEntity.status(CONFLICT).body(apiError);
     }
 
     @ExceptionHandler(Exception.class)
