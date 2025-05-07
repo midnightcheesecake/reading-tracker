@@ -1,5 +1,6 @@
 package com.necrock.readingtracker.user.persistence;
 
+import com.necrock.readingtracker.user.common.UserRole;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,7 @@ class UserRepositoryTest {
 
     @Test
     void save_withUser_setsIdField() {
-        User user = User.builder().build();
+        UserEntity user = UserEntity.builder().build();
 
         var savedUser = repository.save(user);
 
@@ -39,7 +40,7 @@ class UserRepositoryTest {
         var email = "email@provider.com";
         var passwordHash = "#hash";
         var role = UserRole.USER;
-        User user = User.builder().username(username).email(email).passwordHash(passwordHash).role(role).build();
+        UserEntity user = UserEntity.builder().setUsername(username).setEmail(email).setPasswordHash(passwordHash).setRole(role).build();
 
         var savedUser = repository.save(user);
 
@@ -54,7 +55,7 @@ class UserRepositoryTest {
     void save_increasesCount() {
         long initialCount = repository.count();
 
-        repository.save(User.builder().username("newUser").build());
+        repository.save(UserEntity.builder().setUsername("newUser").build());
 
         long finalCount = repository.count();
         assertThat(finalCount).isEqualTo(initialCount + 1);
@@ -63,8 +64,8 @@ class UserRepositoryTest {
     @Test
     void save_withExistingUsername_fails() {
         var duplicateUsername = "duplicateUser";
-        User user1 = User.builder().username(duplicateUsername).email("email1").build();
-        User user2 = User.builder().username(duplicateUsername).email("email2").build();
+        UserEntity user1 = UserEntity.builder().setUsername(duplicateUsername).setEmail("email1").build();
+        UserEntity user2 = UserEntity.builder().setUsername(duplicateUsername).setEmail("email2").build();
 
         repository.save(user1);
 
@@ -86,7 +87,7 @@ class UserRepositoryTest {
         var email = "email@provider.com";
         var passwordHash = "#hash";
         var role = UserRole.USER;
-        User user = User.builder().username(username).email(email).passwordHash(passwordHash).role(role).build();
+        UserEntity user = UserEntity.builder().setUsername(username).setEmail(email).setPasswordHash(passwordHash).setRole(role).build();
 
         var savedUser = repository.save(user);
         var foundUser = repository.findById(savedUser.getId()).orElse(null);
@@ -112,7 +113,7 @@ class UserRepositoryTest {
         var email = "email@provider.com";
         var passwordHash = "#hash";
         var role = UserRole.USER;
-        User user = User.builder().username(username).email(email).passwordHash(passwordHash).role(role).build();
+        UserEntity user = UserEntity.builder().setUsername(username).setEmail(email).setPasswordHash(passwordHash).setRole(role).build();
 
         repository.save(user);
         var foundUser = repository.findByUsername(username).orElse(null);

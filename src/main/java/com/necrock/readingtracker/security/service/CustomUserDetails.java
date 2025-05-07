@@ -1,8 +1,8 @@
 package com.necrock.readingtracker.security.service;
 
 import com.google.common.collect.ImmutableList;
-import com.necrock.readingtracker.user.persistence.User;
-import com.necrock.readingtracker.user.persistence.UserStatus;
+import com.necrock.readingtracker.user.common.UserStatus;
+import com.necrock.readingtracker.user.service.model.User;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -18,16 +18,12 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        switch (user.getRole()) {
-            case USER:
-                return ImmutableList.of(new SimpleGrantedAuthority("ROLE_USER"));
-            case ADMIN:
-                return ImmutableList.of(
-                        new SimpleGrantedAuthority("ROLE_USER"),
-                        new SimpleGrantedAuthority("ROLE_ADMIN"));
-            default:
-                throw new RuntimeException("Internal error: unexpected user role: " + user.getRole());
-        }
+        return switch (user.getRole()) {
+            case USER -> ImmutableList.of(new SimpleGrantedAuthority("ROLE_USER"));
+            case ADMIN -> ImmutableList.of(
+                    new SimpleGrantedAuthority("ROLE_USER"),
+                    new SimpleGrantedAuthority("ROLE_ADMIN"));
+        };
     }
 
     @Override

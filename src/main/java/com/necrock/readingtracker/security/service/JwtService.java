@@ -1,6 +1,6 @@
 package com.necrock.readingtracker.security.service;
 
-import com.necrock.readingtracker.user.persistence.User;
+import com.necrock.readingtracker.user.service.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,5 +1,7 @@
 package com.necrock.readingtracker.user.persistence;
 
+import com.necrock.readingtracker.user.common.UserRole;
+import com.necrock.readingtracker.user.common.UserStatus;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -14,7 +16,7 @@ import static jakarta.persistence.GenerationType.AUTO;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class UserEntity {
 
     @Id
     @GeneratedValue(strategy = AUTO)
@@ -35,13 +37,13 @@ public class User {
 
     private Instant createdAt;
 
-    private User(Long id,
-                 String username,
-                 String email,
-                 String passwordHash,
-                 UserRole role,
-                 UserStatus status,
-                 Instant createdAt) {
+    private UserEntity(Long id,
+                       String username,
+                       String email,
+                       String passwordHash,
+                       UserRole role,
+                       UserStatus status,
+                       Instant createdAt) {
         this.id = id;
         this.username = username;
         this.email = email;
@@ -52,7 +54,7 @@ public class User {
     }
 
     @SuppressWarnings("unused") // Required for JPA
-    protected User() {}
+    protected UserEntity() {}
 
     public static Builder builder() {
         return new Builder();
@@ -92,13 +94,13 @@ public class User {
 
     public Builder toBuilder() {
         return builder()
-                .id(id)
-                .username(username)
-                .email(email)
-                .passwordHash(passwordHash)
-                .role(role)
-                .status(status)
-                .createdAt(createdAt);
+                .setId(id)
+                .setUsername(username)
+                .setEmail(email)
+                .setPasswordHash(passwordHash)
+                .setRole(role)
+                .setStatus(status)
+                .setCreatedAt(createdAt);
     }
 
     public static class Builder {
@@ -116,44 +118,43 @@ public class User {
 
         private Instant createdAt;
 
-        public Builder id(Long id) {
+        public Builder setId(Long id) {
             this.id = id;
             return this;
         }
 
-        public Builder username(String username) {
+        public Builder setUsername(String username) {
             this.username = username;
             return this;
         }
 
-        public Builder email(String email) {
+        public Builder setEmail(String email) {
             this.email = email;
             return this;
         }
 
-        public Builder passwordHash(String passwordHash) {
+        public Builder setPasswordHash(String passwordHash) {
             this.passwordHash = passwordHash;
             return this;
         }
 
-        public Builder role(UserRole role) {
+        public Builder setRole(UserRole role) {
             this.role = role;
             return this;
         }
 
-        public Builder status(UserStatus status) {
+        public Builder setStatus(UserStatus status) {
             this.status = status;
             return this;
         }
 
-        public Builder createdAt(Instant createdAt) {
+        public Builder setCreatedAt(Instant createdAt) {
             this.createdAt = createdAt;
             return this;
         }
 
-        public User build() {
-            return new User(id, username, email, passwordHash, role, status, createdAt);
+        public UserEntity build() {
+            return new UserEntity(id, username, email, passwordHash, role, status, createdAt);
         }
     }
-
 }

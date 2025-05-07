@@ -3,8 +3,9 @@ package com.necrock.readingtracker.user.service;
 import com.necrock.readingtracker.configuration.TestTimeConfig;
 import com.necrock.readingtracker.exception.AlreadyExistsException;
 import com.necrock.readingtracker.exception.NotFoundException;
-import com.necrock.readingtracker.user.persistence.User;
+import com.necrock.readingtracker.user.persistence.UserEntity;
 import com.necrock.readingtracker.user.persistence.UserRepository;
+import com.necrock.readingtracker.user.service.model.User;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +15,12 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
-import static com.necrock.readingtracker.user.persistence.UserRole.ADMIN;
-import static com.necrock.readingtracker.user.persistence.UserRole.USER;
-import static com.necrock.readingtracker.user.persistence.UserStatus.ACTIVE;
-import static com.necrock.readingtracker.user.persistence.UserStatus.DELETED;
+import static com.necrock.readingtracker.user.common.UserRole.ADMIN;
+import static com.necrock.readingtracker.user.common.UserRole.USER;
+import static com.necrock.readingtracker.user.common.UserStatus.ACTIVE;
+import static com.necrock.readingtracker.user.common.UserStatus.DELETED;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -38,27 +40,24 @@ class UserServiceTest {
 
     @Test
     void addUser_savesUser() {
-        var username = "user";
-        var email = "email@provider.com";
-        var passwordHash = "#hash";
-        User toSave = User.builder()
-                // input values
-                .username(username).email(email).passwordHash(passwordHash)
-                .build();
-        User savedUser = User.builder()
-                // input values
-                .username(username).email(email).passwordHash(passwordHash)
-                // default values
-                .status(ACTIVE).role(USER).createdAt(TestTimeConfig.NOW)
+        User toSaveUser = User.builder()
+                .username("user")
+                .email("email@provider.com")
+                .passwordHash("#hash")
                 .build();
 
-        service.addUser(toSave);
+        service.addUser(toSaveUser);
 
-        var captor = ArgumentCaptor.forClass(User.class);
-        verify(repository, times(1)).save(captor.capture());
-        assertThat(captor.getValue())
-                .usingRecursiveComparison()
-                .isEqualTo(savedUser);
+        var captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(repository).save(captor.capture());
+        UserEntity savedUserEntity = captor.getValue();
+        assertThat(savedUserEntity.getId()).isNull();
+        assertThat(savedUserEntity.getUsername()).isEqualTo(toSaveUser.getUsername());
+        assertThat(savedUserEntity.getEmail()).isEqualTo(toSaveUser.getEmail());
+        assertThat(savedUserEntity.getPasswordHash()).isEqualTo(toSaveUser.getPasswordHash());
+        assertThat(savedUserEntity.getRole()).isEqualTo(USER);
+        assertThat(savedUserEntity.getStatus()).isEqualTo(ACTIVE);
+        assertThat(savedUserEntity.getCreatedAt()).isEqualTo(TestTimeConfig.NOW);
     }
 
     @Test
@@ -66,65 +65,79 @@ class UserServiceTest {
         var username = "user";
         var email = "email@provider.com";
         var passwordHash = "#hash";
-        User toSave = User.builder()
+        User toSaveUser = User.builder()
                 .username(username).email(email).passwordHash(passwordHash)
                 .build();
-        User savedUser = User.builder()
-                .id(42L)
-                .username(username).email(email).passwordHash(passwordHash)
-                .status(ACTIVE).role(USER).createdAt(TestTimeConfig.NOW)
+        UserEntity savedUserEntity = UserEntity.builder()
+                .setId(42L)
+                .setUsername(username)
+                .setEmail(email)
+                .setPasswordHash(passwordHash)
+                .setStatus(ACTIVE)
+                .setRole(USER)
+                .setCreatedAt(TestTimeConfig.NOW)
                 .build();
-        when(repository.save(any(User.class))).thenReturn(savedUser);
 
-        var result = service.addUser(toSave);
+        when(repository.save(any(UserEntity.class))).thenReturn(savedUserEntity);
 
-        assertThat(result)
-                .usingRecursiveComparison()
-                .isEqualTo(savedUser);
+        var result = service.addUser(toSaveUser);
+
+        assertUserMatchesEntity(result, savedUserEntity);
     }
 
     @Test
     void addUser_withExistingUsername_throwsAlreadyExistsException() {
         var username = "username";
 
-        when(repository.save(any(User.class))).thenThrow(DataIntegrityViolationException.class);
+        when(repository.save(any(UserEntity.class))).thenThrow(DataIntegrityViolationException.class);
 
-        assertThatThrownBy(() -> service.addUser(testUserBuilder().username(username).build()))
+        assertThatThrownBy(() -> service.addUser(testUser(u -> u.username(username))))
                 .isInstanceOf(AlreadyExistsException.class)
                 .hasMessage("User with username '" + username + "' already exists");
     }
 
     @Test
-    void updateUser_savesUser() {
+    void updateUser_appliesChanges() {
         var id = 42L;
-        var oldEmail = "old.email@provider.com";
-        var newEmail = "new.email@provider.net";
-        User old = testUserBuilder().id(id).email(oldEmail).build();
-        User updateMask = User.builder().email(newEmail).build();
-        User updated = testUserBuilder().id(id).email(newEmail).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(old));
+        UserEntity originalUserEntity = testUserEntity(
+                u -> u.setId(id)
+                        .setEmail("old.email@provider.com"));
+        User updateMask =
+                User.builder()
+                        .email("new.email@provider.net")
+                        .build();
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
 
         service.updateUser(id, updateMask);
 
-        var captor = ArgumentCaptor.forClass(User.class);
-        verify(repository, times(1)).save(captor.capture());
-        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(updated);
+        var captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(repository).save(captor.capture());
+        UserEntity savedUserEntity = captor.getValue();
+        assertThat(savedUserEntity.getId()).isEqualTo(originalUserEntity.getId());
+        assertThat(savedUserEntity.getUsername()).isEqualTo(originalUserEntity.getUsername());
+        assertThat(savedUserEntity.getEmail()).isEqualTo(updateMask.getEmail());
+        assertThat(savedUserEntity.getRole()).isEqualTo(originalUserEntity.getRole());
+        assertThat(savedUserEntity.getStatus()).isEqualTo(originalUserEntity.getStatus());
     }
 
     @Test
     void updateUser_returnsNewlySavedUser() {
         var id = 42L;
-        var oldEmail = "old.email@provider.com";
-        var newEmail = "new.email@provider.net";
-        User old = testUserBuilder().id(id).email(oldEmail).build();
-        User updateMask = User.builder().email(newEmail).build();
-        User updated = testUserBuilder().id(id).email(newEmail).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(old));
-        when(repository.save(any(User.class))).thenReturn(updated);
+        UserEntity originalUserEntity = testUserEntity(
+                u -> u.setId(id)
+                        .setEmail("old.email@provider.com"));
+        User updateMask = User.builder().email("new.email@provider.net").build();
+        UserEntity updatedUserEntity = testUserEntity(
+                u -> u.setId(id)
+                        .setEmail("new.email@provider.net"));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
+        when(repository.save(any(UserEntity.class))).thenReturn(updatedUserEntity);
 
         var result = service.updateUser(id, updateMask);
 
-        assertThat(result).usingRecursiveComparison().isEqualTo(updated);
+        assertUserMatchesEntity(result, updatedUserEntity);
     }
 
     @Test
@@ -133,7 +146,7 @@ class UserServiceTest {
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.updateUser(id, testUserBuilder().build()))
+        assertThatThrownBy(() -> service.updateUser(id, testUser()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("No user with id " + id);
     }
@@ -141,15 +154,22 @@ class UserServiceTest {
     @Test
     void activateUser_setsStatusToActive() {
         var id = 42L;
-        User old = testUserBuilder().id(id).status(DELETED).build();
-        User updated = testUserBuilder().id(id).status(ACTIVE).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(old));
+        UserEntity originalUserEntity = testUserEntity(
+                u -> u.setId(id)
+                        .setStatus(DELETED));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
 
         service.activateUser(id);
 
-        var captor = ArgumentCaptor.forClass(User.class);
-        verify(repository, times(1)).save(captor.capture());
-        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(updated);
+        var captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(repository).save(captor.capture());
+        UserEntity savedUserEntity = captor.getValue();
+        assertThat(savedUserEntity.getId()).isEqualTo(originalUserEntity.getId());
+        assertThat(savedUserEntity.getUsername()).isEqualTo(originalUserEntity.getUsername());
+        assertThat(savedUserEntity.getEmail()).isEqualTo(originalUserEntity.getEmail());
+        assertThat(savedUserEntity.getRole()).isEqualTo(originalUserEntity.getRole());
+        assertThat(savedUserEntity.getStatus()).isEqualTo(ACTIVE);
     }
 
     @Test
@@ -166,15 +186,22 @@ class UserServiceTest {
     @Test
     void deleteUser_setsStatusToDeleted() {
         var id = 42L;
-        User old = testUserBuilder().id(id).status(ACTIVE).build();
-        User updated = testUserBuilder().id(id).status(DELETED).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(old));
+        UserEntity originalUserEntity = testUserEntity(
+                u -> u.setId(id)
+                        .setStatus(ACTIVE));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
 
         service.deleteUser(id);
 
-        var captor = ArgumentCaptor.forClass(User.class);
-        verify(repository, times(1)).save(captor.capture());
-        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(updated);
+        var captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(repository).save(captor.capture());
+        UserEntity savedUserEntity = captor.getValue();
+        assertThat(savedUserEntity.getId()).isEqualTo(originalUserEntity.getId());
+        assertThat(savedUserEntity.getUsername()).isEqualTo(originalUserEntity.getUsername());
+        assertThat(savedUserEntity.getEmail()).isEqualTo(originalUserEntity.getEmail());
+        assertThat(savedUserEntity.getRole()).isEqualTo(originalUserEntity.getRole());
+        assertThat(savedUserEntity.getStatus()).isEqualTo(DELETED);
     }
 
     @Test
@@ -191,8 +218,9 @@ class UserServiceTest {
     @Test
     void getUser_findsUserById() {
         var id = 42L;
-        User user = testUserBuilder().id(id).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        UserEntity userEntity = testUserEntity(u -> u.setId(id));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(userEntity));
 
         service.getUser(id);
 
@@ -204,12 +232,13 @@ class UserServiceTest {
     @Test
     void getUser_returnsUser() {
         var id = 42L;
-        User user = testUserBuilder().id(id).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        UserEntity userEntity = testUserEntity(u -> u.setId(id));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(userEntity));
 
         var result = service.getUser(id);
 
-        assertThat(result).isEqualTo(user);
+        assertUserMatchesEntity(result, userEntity);
     }
 
     @Test
@@ -224,12 +253,13 @@ class UserServiceTest {
     }
 
     @Test
-    void findUserByUsername_findsUserByUsername() {
+    void getUserByUsername_findsUser() {
         var username = "user";
-        User user = testUserBuilder().username(username).build();
-        when(repository.findByUsername(any(String.class))).thenReturn(Optional.of(user));
+        UserEntity userEntity = testUserEntity(u -> u.setUsername(username));
 
-        service.findUserByUsername(username);
+        when(repository.findByUsername(any(String.class))).thenReturn(Optional.of(userEntity));
+
+        service.getUser(username);
 
         var captor = ArgumentCaptor.forClass(String.class);
         verify(repository, times(1)).findByUsername(captor.capture());
@@ -237,23 +267,24 @@ class UserServiceTest {
     }
 
     @Test
-    void findUserByUsername_returnsUser() {
+    void getUserByUsername_returnsUser() {
         var username = "user";
-        User user = testUserBuilder().username(username).build();
-        when(repository.findByUsername(any(String.class))).thenReturn(Optional.of(user));
+        UserEntity userEntity = testUserEntity(u -> u.setUsername(username));
 
-        var result = service.findUserByUsername(username);
+        when(repository.findByUsername(any(String.class))).thenReturn(Optional.of(userEntity));
 
-        assertThat(result).isEqualTo(user);
+        var result = service.getUser(username);
+
+        assertUserMatchesEntity(result, userEntity);
     }
 
     @Test
-    void findUserByUsername_withUnknownUsername_throwsNotFoundException() {
+    void getUser_throwsNotFoundException() {
         var username = "non-existent";
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.findUserByUsername(username))
+        assertThatThrownBy(() -> service.getUser(username))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("No user with username '" + username + "'");
     }
@@ -261,15 +292,22 @@ class UserServiceTest {
     @Test
     void assignUserRole_setsNewUserRole() {
         var id = 42L;
-        User old = testUserBuilder().id(id).role(ADMIN).build();
-        User updated = testUserBuilder().id(id).role(USER).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(old));
+        UserEntity originalUserEntity = testUserEntity(
+                u -> u.setId(id)
+                        .setRole(ADMIN));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
 
         service.assignUserRole(id, USER);
 
-        var captor = ArgumentCaptor.forClass(User.class);
+        var captor = ArgumentCaptor.forClass(UserEntity.class);
         verify(repository, times(1)).save(captor.capture());
-        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(updated);
+        UserEntity savedUserEntity = captor.getValue();
+        assertThat(savedUserEntity.getId()).isEqualTo(originalUserEntity.getId());
+        assertThat(savedUserEntity.getUsername()).isEqualTo(originalUserEntity.getUsername());
+        assertThat(savedUserEntity.getEmail()).isEqualTo(originalUserEntity.getEmail());
+        assertThat(savedUserEntity.getRole()).isEqualTo(USER);
+        assertThat(savedUserEntity.getStatus()).isEqualTo(originalUserEntity.getStatus());
     }
 
     @Test
@@ -286,8 +324,11 @@ class UserServiceTest {
     @Test
     void hasUserRole_whenUserHasRole_returnsTrue() {
         var id = 42L;
-        User user = testUserBuilder().id(id).role(ADMIN).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        UserEntity userEntity = testUserEntity(
+                u -> u.setId(id)
+                        .setRole(ADMIN));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(userEntity));
 
         var result = service.hasUserRole(id, ADMIN);
 
@@ -297,8 +338,11 @@ class UserServiceTest {
     @Test
     void hasUserRole_whenUserDoesNotHaveRole_returnsFalse() {
         var id = 42L;
-        User user = testUserBuilder().id(id).role(USER).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(user));
+        UserEntity userEntity = testUserEntity(
+                u -> u.setId(id)
+                        .setRole(USER));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(userEntity));
 
         var result = service.hasUserRole(id, ADMIN);
 
@@ -316,13 +360,41 @@ class UserServiceTest {
                 .hasMessage("No user with id " + id);
     }
 
-    private static User.Builder testUserBuilder() {
-        return User.builder()
+    private static User testUser() {
+        return testUser(u -> {});
+    }
+
+    private static User testUser(Consumer<User.Builder> overrides) {
+        var builder = User.builder()
                 .id(666L)
                 .username("username")
                 .email("email@provider.com")
                 .passwordHash("#hash")
                 .status(ACTIVE)
                 .role(USER);
+        overrides.accept(builder);
+        return builder.build();
+    }
+
+    private static UserEntity testUserEntity(Consumer<UserEntity.Builder> overrides) {
+        var builder = UserEntity.builder()
+                .setId(666L)
+                .setUsername("username")
+                .setEmail("email@provider.com")
+                .setPasswordHash("#hash")
+                .setStatus(ACTIVE)
+                .setRole(USER);
+        overrides.accept(builder);
+        return builder.build();
+    }
+
+    private static void assertUserMatchesEntity(User user, UserEntity entity) {
+        assertThat(user.getId()).isEqualTo(entity.getId());
+        assertThat(user.getUsername()).isEqualTo(entity.getUsername());
+        assertThat(user.getEmail()).isEqualTo(entity.getEmail());
+        assertThat(user.getPasswordHash()).isEqualTo(entity.getPasswordHash());
+        assertThat(user.getStatus()).isEqualTo(entity.getStatus());
+        assertThat(user.getRole()).isEqualTo(entity.getRole());
+        assertThat(user.getCreatedAt()).isEqualTo(entity.getCreatedAt());
     }
 }

@@ -2,10 +2,10 @@ package com.necrock.readingtracker.user.service;
 
 import com.necrock.readingtracker.exception.NotFoundException;
 import com.necrock.readingtracker.exception.AlreadyExistsException;
-import com.necrock.readingtracker.user.persistence.User;
 import com.necrock.readingtracker.user.persistence.UserRepository;
-import com.necrock.readingtracker.user.persistence.UserRole;
-import com.necrock.readingtracker.user.persistence.UserStatus;
+import com.necrock.readingtracker.user.common.UserRole;
+import com.necrock.readingtracker.user.common.UserStatus;
+import com.necrock.readingtracker.user.service.model.User;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
@@ -16,10 +16,12 @@ import java.time.Instant;
 public class UserService {
 
     private final UserRepository repository;
+    private final UserEntityMapper mapper;
     private final Clock clock;
 
-    public UserService(UserRepository repository, Clock clock) {
+    public UserService(UserRepository repository, UserEntityMapper mapper, Clock clock) {
         this.repository = repository;
+        this.mapper = mapper;
         this.clock = clock;
     }
 
@@ -27,7 +29,7 @@ public class UserService {
         var enrichedUser =
                 user.toBuilder().status(UserStatus.ACTIVE).role(UserRole.USER).createdAt(Instant.now(clock)).build();
         try {
-            return repository.save(enrichedUser);
+            return saveUser(enrichedUser);
         } catch (DataIntegrityViolationException e) {
             throw new AlreadyExistsException(
                     String.format("User with username '%s' already exists", user.getUsername()));
@@ -35,8 +37,7 @@ public class UserService {
     }
 
     public User updateUser(long id, User user) {
-        var existingUser = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("No user with id %d", id)));
+        var existingUser = getUser(id);
 
         var updatedUserBuilder = existingUser.toBuilder();
         if (user.getEmail() != null) {
@@ -46,43 +47,44 @@ public class UserService {
             updatedUserBuilder.passwordHash(user.getPasswordHash());
         }
 
-        return repository.save(updatedUserBuilder.build());
+        return saveUser(updatedUserBuilder.build());
     }
 
     public void activateUser(long id) {
-        var user = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("No user with id %d", id)));
-        var deletedUser = user.toBuilder().status(UserStatus.ACTIVE).build();
-        repository.save(deletedUser);
+        var user = getUser(id);
+        var activatedUser = user.toBuilder().status(UserStatus.ACTIVE).build();
+        saveUser(activatedUser);
     }
 
     public void deleteUser(long id) {
-        var user = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("No user with id %d", id)));
+        var user = getUser(id);
         var deletedUser = user.toBuilder().status(UserStatus.DELETED).build();
-        repository.save(deletedUser);
+        saveUser(deletedUser);
+    }
+
+    public void assignUserRole(long id, UserRole newRole) {
+        var user = getUser(id);
+        var updatedUser = user.toBuilder().role(newRole).build();
+        saveUser(updatedUser);
+    }
+
+    public boolean hasUserRole(long id, UserRole requiredRole) {
+        return getUser(id).getRole() == requiredRole;
     }
 
     public User getUser(long id) {
         return repository.findById(id)
+                .map(mapper::toDomainModel)
                 .orElseThrow(() -> new NotFoundException(String.format("No user with id %d", id)));
     }
 
-    public User findUserByUsername(String username) {
+    public User getUser(String username) {
         return repository.findByUsername(username)
+                .map(mapper::toDomainModel)
                 .orElseThrow(() -> new NotFoundException(String.format("No user with username '%s'", username)));
     }
 
-    public void assignUserRole(long id, UserRole newRole) {
-        var user = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("No user with id %d", id)));
-        var updatedUser = user.toBuilder().role(newRole).build();
-        repository.save(updatedUser);
-    }
-
-    public boolean hasUserRole(long id, UserRole requiredRole) {
-        var user = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("No user with id %d", id)));
-        return user.getRole() == requiredRole;
+    private User saveUser(User user) {
+        return mapper.toDomainModel(repository.save(mapper.toEntity(user)));
     }
 }
