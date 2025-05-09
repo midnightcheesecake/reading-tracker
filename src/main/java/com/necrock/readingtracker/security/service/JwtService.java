@@ -3,7 +3,6 @@ package com.necrock.readingtracker.security.service;
 import com.necrock.readingtracker.user.service.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -43,27 +42,16 @@ public class JwtService {
         private final Claims claims;
 
         private Token(String tokenString) {
-            claims = Jwts.parserBuilder()
+            var parser = Jwts.parserBuilder()
+                    .setClock(() -> Date.from(clock.instant()))
                     .setSigningKey(signingKey)
-                    .build()
-                    .parseClaimsJws(tokenString)
+                    .build();
+            claims = parser.parseClaimsJws(tokenString)
                     .getBody();
         }
 
         public String getUsername() {
             return claims.getSubject();
-        }
-
-        public boolean isValidFor(UserDetails userDetails) {
-            return isForUser(userDetails) && !isExpired();
-        }
-
-        private boolean isForUser(UserDetails userDetails) {
-            return claims.getSubject().equals(userDetails.getUsername());
-        }
-
-        private boolean isExpired() {
-            return claims.getExpiration().before(Date.from(Instant.now(clock)));
         }
     }
 }

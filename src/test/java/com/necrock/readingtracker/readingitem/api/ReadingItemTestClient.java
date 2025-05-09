@@ -14,13 +14,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 
 public class ReadingItemTestClient {
-
-    private final MockMvc mockMvc;
+    private final MockMvc mvc;
     private final ObjectMapper objectMapper;
     private final TestAuthHelper testAuthHelper;
 
-    public ReadingItemTestClient(MockMvc mockMvc, ObjectMapper objectMapper, TestAuthHelper testAuthHelper) {
-        this.mockMvc = mockMvc;
+    public ReadingItemTestClient(MockMvc mvc, ObjectMapper objectMapper, TestAuthHelper testAuthHelper) {
+        this.mvc = mvc;
         this.objectMapper = objectMapper;
         this.testAuthHelper = testAuthHelper;
     }
@@ -28,7 +27,7 @@ public class ReadingItemTestClient {
     public ResultActions addReadingItem(CreateReadingItemDto dto) throws Exception {
         String token = testAuthHelper.createUserAndGetToken("testUser", "password");
         String json = objectMapper.writeValueAsString(dto);
-        return mockMvc.perform(post("/api/items")
+        return mvc.perform(post("/api/items")
                 .header("Authorization", "Bearer " + token)
                 .contentType(APPLICATION_JSON)
                 .content(json));
@@ -37,7 +36,7 @@ public class ReadingItemTestClient {
     public ResultActions updateReadingItem(long id, UpdateReadingItemDto dto) throws Exception {
         String token = testAuthHelper.createUserAndGetToken("testUser", "password");
         String json = objectMapper.writeValueAsString(dto);
-        return mockMvc.perform(patch("/api/items/" + id)
+        return mvc.perform(patch("/api/items/" + id)
                 .header("Authorization", "Bearer " + token)
                 .contentType(APPLICATION_JSON)
                 .content(json));
@@ -45,19 +44,19 @@ public class ReadingItemTestClient {
 
     public ResultActions deleteReadingItem(long id) throws Exception {
         String token = testAuthHelper.createUserAndGetToken("testUser", "password");
-        return mockMvc.perform(delete("/api/items/" + id)
+        return mvc.perform(delete("/api/items/" + id)
                 .header("Authorization", "Bearer " + token));
     }
 
     public ResultActions getReadingItem(long id) throws Exception {
         String token = testAuthHelper.createUserAndGetToken("testUser", "password");
-        return mockMvc.perform(get("/api/items/" + id)
+        return mvc.perform(get("/api/items/" + id)
                 .header("Authorization", "Bearer " + token));
     }
 
     public ResultActions listReadingItems() throws Exception {
         String token = testAuthHelper.createUserAndGetToken("testUser", "password");
-        return mockMvc.perform(get("/api/items")
+        return mvc.perform(get("/api/items")
                 .header("Authorization", "Bearer " + token));
     }
 

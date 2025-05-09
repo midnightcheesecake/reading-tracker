@@ -267,7 +267,7 @@ class UserServiceTest {
         service.getUser(username);
 
         var captor = ArgumentCaptor.forClass(String.class);
-        verify(repository, times(1)).findByUsername(captor.capture());
+        verify(repository).findByUsername(captor.capture());
         assertThat(captor.getValue()).isEqualTo(username);
     }
 

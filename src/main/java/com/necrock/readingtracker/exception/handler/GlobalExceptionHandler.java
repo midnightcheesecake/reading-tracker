@@ -2,6 +2,7 @@ package com.necrock.readingtracker.exception.handler;
 
 import com.necrock.readingtracker.exception.AlreadyExistsException;
 import com.necrock.readingtracker.exception.NotFoundException;
+import com.necrock.readingtracker.exception.UnauthorizedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -13,11 +14,13 @@ import java.util.Map;
 import static com.necrock.readingtracker.exception.handler.ErrorType.ALREADY_EXISTS_ERROR;
 import static com.necrock.readingtracker.exception.handler.ErrorType.INTERNAL_ERROR;
 import static com.necrock.readingtracker.exception.handler.ErrorType.NOT_FOUND_ERROR;
+import static com.necrock.readingtracker.exception.handler.ErrorType.UNAUTHORIZED_ERROR;
 import static com.necrock.readingtracker.exception.handler.ErrorType.VALIDATION_ERROR;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.CONFLICT;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -44,6 +47,12 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ApiError> handleAlreadyExists(AlreadyExistsException ex) {
         var apiError = new ApiError(ALREADY_EXISTS_ERROR, ex.getMessage());
         return ResponseEntity.status(CONFLICT).body(apiError);
+    }
+
+    @ExceptionHandler(UnauthorizedException.class)
+    public ResponseEntity<ApiError> handleUnauthorized(UnauthorizedException ex) {
+        var apiError = new ApiError(UNAUTHORIZED_ERROR, ex.getMessage());
+        return ResponseEntity.status(UNAUTHORIZED).body(apiError);
     }
 
     @ExceptionHandler(Exception.class)
