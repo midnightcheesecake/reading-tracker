@@ -1,5 +1,6 @@
 package com.necrock.readingtracker.readingitem.persistence;
 
+import com.necrock.readingtracker.readingitem.common.ReadingItemType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +24,7 @@ class ReadingItemRepositoryTest {
 
     @Test
     void save_withReadingItem_setsIdField() {
-        ReadingItem readingItem = ReadingItem.builder().build();
+        ReadingItemEntity readingItem = ReadingItemEntity.builder().build();
 
         var savedItem = repository.save(readingItem);
 
@@ -37,8 +38,8 @@ class ReadingItemRepositoryTest {
         var author = "author";
         var type = ReadingItemType.BOOK;
         var numChapters = 6;
-        ReadingItem readingItem =
-                ReadingItem.builder().title(title).author(author).type(type).numberChapters(numChapters).build();
+        ReadingItemEntity readingItem =
+                ReadingItemEntity.builder().title(title).author(author).type(type).numberChapters(numChapters).build();
 
         var savedItem = repository.save(readingItem);
 
@@ -53,7 +54,7 @@ class ReadingItemRepositoryTest {
     void save_increasesCount() {
         long initialCount = repository.count();
 
-        repository.save(ReadingItem.builder().title("title").build());
+        repository.save(ReadingItemEntity.builder().title("title").build());
 
         long finalCount = repository.count();
         assertThat(finalCount).isEqualTo(initialCount + 1);
@@ -73,8 +74,8 @@ class ReadingItemRepositoryTest {
         var author = "author";
         var type = ReadingItemType.BOOK;
         var numChapters = 6;
-        ReadingItem readingItem =
-                ReadingItem.builder().title(title).author(author).type(type).numberChapters(numChapters).build();
+        ReadingItemEntity readingItem =
+                ReadingItemEntity.builder().title(title).author(author).type(type).numberChapters(numChapters).build();
 
         var savedItem = repository.save(readingItem);
         var foundItem = repository.findById(savedItem.getId()).orElse(null);

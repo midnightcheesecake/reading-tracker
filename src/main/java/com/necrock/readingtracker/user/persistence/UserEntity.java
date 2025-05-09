@@ -92,17 +92,6 @@ public class UserEntity {
         return createdAt;
     }
 
-    public Builder toBuilder() {
-        return builder()
-                .setId(id)
-                .setUsername(username)
-                .setEmail(email)
-                .setPasswordHash(passwordHash)
-                .setRole(role)
-                .setStatus(status)
-                .setCreatedAt(createdAt);
-    }
-
     public static class Builder {
         private Long id;
 

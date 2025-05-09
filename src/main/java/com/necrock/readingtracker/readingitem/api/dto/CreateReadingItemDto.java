@@ -1,6 +1,6 @@
 package com.necrock.readingtracker.readingitem.api.dto;
 
-import com.necrock.readingtracker.readingitem.persistence.ReadingItemType;
+import com.necrock.readingtracker.readingitem.common.ReadingItemType;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PositiveOrZero;

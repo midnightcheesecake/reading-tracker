@@ -10,7 +10,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.ResultActions;
 
-import static com.necrock.readingtracker.readingitem.persistence.ReadingItemType.BOOK;
+import static com.necrock.readingtracker.readingitem.common.ReadingItemType.BOOK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;

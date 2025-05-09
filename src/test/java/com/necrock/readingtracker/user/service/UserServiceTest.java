@@ -99,8 +99,9 @@ class UserServiceTest {
     @Test
     void updateUser_appliesChanges() {
         var id = 42L;
-        UserEntity originalUserEntity = testUserEntity(
-                u -> u.setId(id)
+        UserEntity originalUserEntity =
+                testUserEntity(u -> u
+                        .setId(id)
                         .setEmail("old.email@provider.com"));
         User updateMask =
                 User.builder()
@@ -124,12 +125,14 @@ class UserServiceTest {
     @Test
     void updateUser_returnsNewlySavedUser() {
         var id = 42L;
-        UserEntity originalUserEntity = testUserEntity(
-                u -> u.setId(id)
+        UserEntity originalUserEntity =
+                testUserEntity(u -> u
+                        .setId(id)
                         .setEmail("old.email@provider.com"));
         User updateMask = User.builder().email("new.email@provider.net").build();
-        UserEntity updatedUserEntity = testUserEntity(
-                u -> u.setId(id)
+        UserEntity updatedUserEntity =
+                testUserEntity(u -> u
+                        .setId(id)
                         .setEmail("new.email@provider.net"));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
@@ -154,8 +157,9 @@ class UserServiceTest {
     @Test
     void activateUser_setsStatusToActive() {
         var id = 42L;
-        UserEntity originalUserEntity = testUserEntity(
-                u -> u.setId(id)
+        UserEntity originalUserEntity =
+                testUserEntity(u -> u
+                        .setId(id)
                         .setStatus(DELETED));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
@@ -186,8 +190,9 @@ class UserServiceTest {
     @Test
     void deleteUser_setsStatusToDeleted() {
         var id = 42L;
-        UserEntity originalUserEntity = testUserEntity(
-                u -> u.setId(id)
+        UserEntity originalUserEntity =
+                testUserEntity(u -> u
+                        .setId(id)
                         .setStatus(ACTIVE));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
@@ -292,8 +297,9 @@ class UserServiceTest {
     @Test
     void assignUserRole_setsNewUserRole() {
         var id = 42L;
-        UserEntity originalUserEntity = testUserEntity(
-                u -> u.setId(id)
+        UserEntity originalUserEntity =
+                testUserEntity(u -> u
+                        .setId(id)
                         .setRole(ADMIN));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
@@ -324,8 +330,9 @@ class UserServiceTest {
     @Test
     void hasUserRole_whenUserHasRole_returnsTrue() {
         var id = 42L;
-        UserEntity userEntity = testUserEntity(
-                u -> u.setId(id)
+        UserEntity userEntity =
+                testUserEntity(u -> u
+                        .setId(id)
                         .setRole(ADMIN));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(userEntity));
@@ -338,8 +345,9 @@ class UserServiceTest {
     @Test
     void hasUserRole_whenUserDoesNotHaveRole_returnsFalse() {
         var id = 42L;
-        UserEntity userEntity = testUserEntity(
-                u -> u.setId(id)
+        UserEntity userEntity =
+                testUserEntity(u -> u
+                        .setId(id)
                         .setRole(USER));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(userEntity));

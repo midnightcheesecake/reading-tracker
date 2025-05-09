@@ -42,12 +42,12 @@ public class ReadingItemController {
     @PostMapping
     @ResponseStatus(CREATED)
     public ReadingItemDetailsDto addItem(@Valid @RequestBody CreateReadingItemDto item) {
-        return mapper.toDetailsDto(service.addReadingItem(mapper.toEntity(item)));
+        return mapper.toDetailsDto(service.addReadingItem(mapper.toDomainModel(item)));
     }
 
     @PatchMapping("/{id}")
     public ReadingItemDetailsDto updateItem(@PathVariable Long id, @Valid @RequestBody UpdateReadingItemDto item) {
-        return mapper.toDetailsDto(service.updateReadingItem(id, mapper.toEntity(item)));
+        return mapper.toDetailsDto(service.updateReadingItem(id, mapper.toDomainModel(item)));
     }
 
     @DeleteMapping("/{id}")

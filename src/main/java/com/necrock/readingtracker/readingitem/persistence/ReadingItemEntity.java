@@ -1,5 +1,6 @@
 package com.necrock.readingtracker.readingitem.persistence;
 
+import com.necrock.readingtracker.readingitem.common.ReadingItemType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -13,7 +14,7 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
 @Table(name = "items")
-public class ReadingItem {
+public class ReadingItemEntity {
 
     @Id
     @GeneratedValue(strategy = IDENTITY)
@@ -29,12 +30,12 @@ public class ReadingItem {
 
     private Instant createdAt;
 
-    private ReadingItem(Long id,
-                        String title,
-                        ReadingItemType type,
-                        String author,
-                        Integer numberChapters,
-                        Instant createdAt) {
+    private ReadingItemEntity(Long id,
+                              String title,
+                              ReadingItemType type,
+                              String author,
+                              Integer numberChapters,
+                              Instant createdAt) {
         this.id = id;
         this.title = title;
         this.type = type;
@@ -44,7 +45,7 @@ public class ReadingItem {
     }
 
     @SuppressWarnings("unused") // Required for JPA
-    protected ReadingItem() {}
+    protected ReadingItemEntity() {}
 
     public static Builder builder() {
         return new Builder();
@@ -77,16 +78,6 @@ public class ReadingItem {
 
     public Instant getCreatedAt() {
         return createdAt;
-    }
-
-    public Builder toBuilder() {
-        return builder()
-                .id(id)
-                .title(title)
-                .type(type)
-                .author(author)
-                .numberChapters(numberChapters)
-                .createdAt(createdAt);
     }
 
     public static class Builder {
@@ -132,8 +123,8 @@ public class ReadingItem {
             return this;
         }
 
-        public ReadingItem build() {
-            return new ReadingItem(id, title, type, author, numberChapters, createdAt);
+        public ReadingItemEntity build() {
+            return new ReadingItemEntity(id, title, type, author, numberChapters, createdAt);
         }
     }
 }

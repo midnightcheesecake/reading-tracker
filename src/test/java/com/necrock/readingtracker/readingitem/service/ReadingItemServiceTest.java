@@ -3,8 +3,9 @@ package com.necrock.readingtracker.readingitem.service;
 import com.google.common.collect.ImmutableList;
 import com.necrock.readingtracker.configuration.TestTimeConfig;
 import com.necrock.readingtracker.exception.NotFoundException;
-import com.necrock.readingtracker.readingitem.persistence.ReadingItem;
+import com.necrock.readingtracker.readingitem.persistence.ReadingItemEntity;
 import com.necrock.readingtracker.readingitem.persistence.ReadingItemRepository;
+import com.necrock.readingtracker.readingitem.service.model.ReadingItem;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,9 +14,10 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.util.Optional;
+import java.util.function.Consumer;
 
-import static com.necrock.readingtracker.readingitem.persistence.ReadingItemType.ARTICLE;
-import static com.necrock.readingtracker.readingitem.persistence.ReadingItemType.BOOK;
+import static com.necrock.readingtracker.readingitem.common.ReadingItemType.ARTICLE;
+import static com.necrock.readingtracker.readingitem.common.ReadingItemType.BOOK;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -35,38 +37,37 @@ class ReadingItemServiceTest {
 
     @Test
     void getAllReadingItems_returnsAllReadingItems() {
-        ReadingItem item1 = ReadingItem.builder().id(1L).title("Book 1").type(BOOK).build();
-        ReadingItem item2 = ReadingItem.builder().id(2L).title("Book 2").type(BOOK).build();
+        ReadingItemEntity item1 = ReadingItemEntity.builder().id(1L).title("Book 1").type(BOOK).build();
+        ReadingItemEntity item2 = ReadingItemEntity.builder().id(2L).title("Book 2").type(BOOK).build();
         when(repository.findAll()).thenReturn(ImmutableList.of(item1, item2));
 
         var result = service.getAllReadingItems();
 
-        assertThat(result).containsExactly(item1, item2);
+        assertThat(result).hasSize(2);
+        assertThat(result).anySatisfy(item -> assertReadingItemMatchesEntity(item, item1));
+        assertThat(result).anySatisfy(item -> assertReadingItemMatchesEntity(item, item2));
     }
 
     @Test
     void addReadingItem_savesReadingItem() {
-        var title = "New Book";
-        var author = "A. U. Thor";
-        var numberChapters = 69;
-        ReadingItem toSave = ReadingItem.builder()
-                // input values
-                .title(title).author(author).type(BOOK).numberChapters(numberChapters)
-                .build();
-        ReadingItem savedReadingItem = ReadingItem.builder()
-                // input values
-                .title(title).author(author).type(BOOK).numberChapters(numberChapters)
-                // default values
-                .createdAt(TestTimeConfig.NOW)
+        ReadingItem toSaveReadingItem = ReadingItem.builder()
+                .title("New Book")
+                .author("A. U. Thor")
+                .type(BOOK)
+                .numberChapters(69)
                 .build();
 
-        service.addReadingItem(toSave);
+        service.addReadingItem(toSaveReadingItem);
 
-        var captor = ArgumentCaptor.forClass(ReadingItem.class);
-        verify(repository, times(1)).save(captor.capture());
-        assertThat(captor.getValue())
-                .usingRecursiveComparison()
-                .isEqualTo(savedReadingItem);
+        var captor = ArgumentCaptor.forClass(ReadingItemEntity.class);
+        verify(repository).save(captor.capture());
+        ReadingItemEntity savedReadingItemEntity = captor.getValue();
+        assertThat(savedReadingItemEntity.getId()).isNull();
+        assertThat(savedReadingItemEntity.getTitle()).isEqualTo(toSaveReadingItem.getTitle());
+        assertThat(savedReadingItemEntity.getType()).isEqualTo(toSaveReadingItem.getType());
+        assertThat(savedReadingItemEntity.getAuthor()).isEqualTo(toSaveReadingItem.getAuthor());
+        assertThat(savedReadingItemEntity.getNumberChapters()).isEqualTo(toSaveReadingItem.getNumberChapters());
+        assertThat(savedReadingItemEntity.getCreatedAt()).isEqualTo(TestTimeConfig.NOW);
     }
 
     @Test
@@ -74,52 +75,71 @@ class ReadingItemServiceTest {
         var title = "New Book";
         var author = "A. U. Thor";
         var numberChapters = 69;
-        ReadingItem toSave = ReadingItem.builder()
+        ReadingItem toSaveReadingItem = ReadingItem.builder()
                 .title(title).author(author).type(BOOK).numberChapters(numberChapters)
                 .build();
-        ReadingItem savedReadingItem = ReadingItem.builder()
+        ReadingItemEntity savedEntity = ReadingItemEntity.builder()
                 .id(42L)
                 .title(title).author(author).type(BOOK).numberChapters(numberChapters)
                 .createdAt(TestTimeConfig.NOW)
                 .build();
-        when(repository.save(any(ReadingItem.class))).thenReturn(savedReadingItem);
+        when(repository.save(any(ReadingItemEntity.class))).thenReturn(savedEntity);
 
-        var result = service.addReadingItem(toSave);
+        var result = service.addReadingItem(toSaveReadingItem);
 
-        assertThat(result).isEqualTo(savedReadingItem);
+        assertReadingItemMatchesEntity(result, savedEntity);
     }
 
     @Test
-    void updateReadingItem_savesReadingItem() {
+    void updateReadingItem_appliesChanges() {
         var id = 42L;
-        var oldTitle = "Old Title";
-        var newTitle = "New Title";
-        ReadingItem old = testReadingItemBuilder().id(id).title(oldTitle).build();
-        ReadingItem updateMask = ReadingItem.builder().title(newTitle).build();
-        ReadingItem updated = testReadingItemBuilder().id(id).title(newTitle).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(old));
+        ReadingItemEntity originalEntity =
+                testReadingItemEntity(ri -> ri
+                        .id(id)
+                        .title("Old Title"));
+        ReadingItem updateMask =
+                ReadingItem.builder()
+                        .title("New Title")
+                        .build();
+
+        when(repository.findById(any(Long.class)))
+                .thenReturn(Optional.of(originalEntity));
 
         service.updateReadingItem(id, updateMask);
 
-        var captor = ArgumentCaptor.forClass(ReadingItem.class);
-        verify(repository, times(1)).save(captor.capture());
-        assertThat(captor.getValue()).usingRecursiveComparison().isEqualTo(updated);
+        var captor = ArgumentCaptor.forClass(ReadingItemEntity.class);
+        verify(repository).save(captor.capture());
+        ReadingItemEntity updatedEntity = captor.getValue();
+        assertThat(updatedEntity.getId()).isEqualTo(originalEntity.getId());
+        assertThat(updatedEntity.getTitle()).isEqualTo(updateMask.getTitle());
+        assertThat(updatedEntity.getType()).isEqualTo(originalEntity.getType());
+        assertThat(updatedEntity.getAuthor()).isEqualTo(originalEntity.getAuthor());
+        assertThat(updatedEntity.getNumberChapters()).isEqualTo(originalEntity.getNumberChapters());
+        assertThat(updatedEntity.getCreatedAt()).isEqualTo(originalEntity.getCreatedAt());
     }
 
     @Test
     void updateReadingItem_returnsNewlySavedReadingItem() {
         var id = 42L;
-        var oldTitle = "Old Title";
-        var newTitle = "New Title";
-        ReadingItem old = testReadingItemBuilder().id(id).title(oldTitle).build();
-        ReadingItem updateMask = ReadingItem.builder().title(newTitle).build();
-        ReadingItem updated = testReadingItemBuilder().id(id).title(newTitle).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(old));
-        when(repository.save(any(ReadingItem.class))).thenReturn(updated);
+        ReadingItemEntity originalEntity =
+                testReadingItemEntity(ri -> ri
+                        .id(id)
+                        .title("Old Title"));
+        ReadingItem updateMask =
+                ReadingItem.builder()
+                        .title("New Title")
+                        .build();
+        ReadingItemEntity updatedEntity =
+                testReadingItemEntity(ri -> ri
+                        .id(id)
+                        .title("New Title"));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalEntity));
+        when(repository.save(any(ReadingItemEntity.class))).thenReturn(updatedEntity);
 
         var result = service.updateReadingItem(id, updateMask);
 
-        assertThat(result).isEqualTo(updated);
+        assertReadingItemMatchesEntity(result, updatedEntity);
     }
 
     @Test
@@ -128,7 +148,7 @@ class ReadingItemServiceTest {
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.updateReadingItem(id, testReadingItemBuilder().build()))
+        assertThatThrownBy(() -> service.updateReadingItem(id, testReadingItem()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("No reading item with id " + id);
     }
@@ -136,14 +156,14 @@ class ReadingItemServiceTest {
     @Test
     void deleteReadingItem_deletesReadingItem() {
         var id = 42L;
-        ReadingItem deleted = ReadingItem.builder().id(id).title("New Title").type(BOOK).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(deleted));
+        ReadingItemEntity deletedEntity = testReadingItemEntity(ri -> ri.id(id));
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(deletedEntity));
 
         service.deleteReadingItem(id);
 
-        var captor = ArgumentCaptor.forClass(ReadingItem.class);
-        verify(repository, times(1)).delete(captor.capture());
-        assertThat(captor.getValue()).isEqualTo(deleted);
+        var captor = ArgumentCaptor.forClass(ReadingItemEntity.class);
+        verify(repository).delete(captor.capture());
+        assertThat(captor.getValue()).isEqualTo(deletedEntity);
     }
 
     @Test
@@ -160,8 +180,8 @@ class ReadingItemServiceTest {
     @Test
     void getReadingItem_findsReadingItemById() {
         var id = 42L;
-        ReadingItem item = testReadingItemBuilder().id(id).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(item));
+        ReadingItemEntity entity = testReadingItemEntity(ri -> ri.id(id));
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(entity));
 
         service.getReadingItem(id);
 
@@ -173,12 +193,12 @@ class ReadingItemServiceTest {
     @Test
     void getReadingItem_returnsReadingItem() {
         var id = 42L;
-        ReadingItem item = testReadingItemBuilder().id(id).build();
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(item));
+        ReadingItemEntity entity = testReadingItemEntity(ri -> ri.id(id));
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(entity));
 
         var result = service.getReadingItem(id);
 
-        assertThat(result).isEqualTo(item);
+        assertReadingItemMatchesEntity(result, entity);
     }
 
     @Test
@@ -192,12 +212,38 @@ class ReadingItemServiceTest {
                 .hasMessage("No reading item with id " + id);
     }
 
-    private static ReadingItem.Builder testReadingItemBuilder() {
-        return ReadingItem.builder()
+    private static ReadingItem testReadingItem() {
+        return testReadingItem(ri -> {});
+    }
+
+    private static ReadingItem testReadingItem(Consumer<ReadingItem.Builder> overrides) {
+        var builder = ReadingItem.builder()
                 .id(666L)
                 .title("an article")
                 .type(ARTICLE)
                 .author("an author")
                 .numberChapters(500);
+        overrides.accept(builder);
+        return builder.build();
+    }
+
+    private static ReadingItemEntity testReadingItemEntity(Consumer<ReadingItemEntity.Builder> overrides) {
+        var builder = ReadingItemEntity.builder()
+                .id(666L)
+                .title("an article")
+                .type(ARTICLE)
+                .author("an author")
+                .numberChapters(500);
+        overrides.accept(builder);
+        return builder.build();
+    }
+
+    private static void assertReadingItemMatchesEntity(ReadingItem readingItem, ReadingItemEntity entity) {
+        assertThat(readingItem.getId()).isEqualTo(entity.getId());
+        assertThat(readingItem.getTitle()).isEqualTo(entity.getTitle());
+        assertThat(readingItem.getType()).isEqualTo(entity.getType());
+        assertThat(readingItem.getAuthor()).isEqualTo(entity.getAuthor());
+        assertThat(readingItem.getNumberChapters()).isEqualTo(entity.getNumberChapters());
+        assertThat(readingItem.getCreatedAt()).isEqualTo(entity.getCreatedAt());
     }
 }

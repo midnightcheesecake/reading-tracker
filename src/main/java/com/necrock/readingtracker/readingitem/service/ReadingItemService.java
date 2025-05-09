@@ -1,37 +1,43 @@
 package com.necrock.readingtracker.readingitem.service;
 
 import com.google.common.collect.ImmutableList;
-import com.necrock.readingtracker.readingitem.persistence.ReadingItem;
 import com.necrock.readingtracker.readingitem.persistence.ReadingItemRepository;
 import com.necrock.readingtracker.exception.NotFoundException;
+import com.necrock.readingtracker.readingitem.service.model.ReadingItem;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
 import java.time.Instant;
+import java.util.stream.StreamSupport;
+
+import static com.google.common.collect.ImmutableList.toImmutableList;
 
 @Service
 public class ReadingItemService {
 
     private final ReadingItemRepository repository;
+    private final ReadingItemEntityMapper mapper;
     private final Clock clock;
 
-    public ReadingItemService(ReadingItemRepository repository, Clock clock) {
+    public ReadingItemService(ReadingItemRepository repository, ReadingItemEntityMapper mapper, Clock clock) {
         this.repository = repository;
+        this.mapper = mapper;
         this.clock = clock;
     }
 
     public ImmutableList<ReadingItem> getAllReadingItems() {
-        return ImmutableList.copyOf(repository.findAll());
+        return StreamSupport.stream(repository.findAll().spliterator(), false)
+                .map(mapper::toDomainModel)
+                .collect(toImmutableList());
     }
 
     public ReadingItem addReadingItem(ReadingItem item) {
         var enrichedReadingItem = item.toBuilder().createdAt(Instant.now(clock)).build();
-        return repository.save(enrichedReadingItem);
+        return mapper.toDomainModel(repository.save(mapper.toEntity(enrichedReadingItem)));
     }
 
     public ReadingItem updateReadingItem(long id, ReadingItem item) {
-        var existingItem = repository.findById(id)
-                .orElseThrow(() -> new NotFoundException(String.format("No reading item with id %d", id)));
+        var existingItem = getReadingItem(id);
 
         var updatedItemBuilder = existingItem.toBuilder();
         if (item.getTitle() != null) {
@@ -47,7 +53,7 @@ public class ReadingItemService {
             updatedItemBuilder.numberChapters(item.getNumberChapters());
         }
 
-        return repository.save(updatedItemBuilder.build());
+        return mapper.toDomainModel(repository.save(mapper.toEntity(updatedItemBuilder.build())));
     }
 
     public void deleteReadingItem(long id) {
@@ -58,6 +64,7 @@ public class ReadingItemService {
 
     public ReadingItem getReadingItem(long id) {
         return repository.findById(id)
+                .map(mapper::toDomainModel)
                 .orElseThrow(() -> new NotFoundException(String.format("No reading item with id %d", id)));
     }
 }

@@ -1,4 +1,4 @@
-package com.necrock.readingtracker.readingitem.persistence;
+package com.necrock.readingtracker.readingitem.common;
 
 public enum ReadingItemType {
     BOOK,
