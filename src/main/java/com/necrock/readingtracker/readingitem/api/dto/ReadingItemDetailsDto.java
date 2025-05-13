@@ -4,16 +4,10 @@ import com.necrock.readingtracker.readingitem.common.ReadingItemType;
 import jakarta.validation.constraints.NotBlank;
 
 public class ReadingItemDetailsDto {
-
     private final Long id;
-
-    @NotBlank(message = "Title is required")
     private final String title;
-
     private final ReadingItemType type;
-
     private final String author;
-
     private final Integer numberChapters;
 
     private ReadingItemDetailsDto(Long id, String title, ReadingItemType type, String author, Integer numberChapters) {
@@ -49,15 +43,10 @@ public class ReadingItemDetailsDto {
     }
 
     public static class Builder {
-
         private Long id;
-
         private String title;
-
         private ReadingItemType type;
-
         private String author;
-
         private Integer numberChapters;
 
         private Builder() {}

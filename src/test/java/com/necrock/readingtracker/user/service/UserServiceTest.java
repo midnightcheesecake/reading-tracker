@@ -1,6 +1,6 @@
 package com.necrock.readingtracker.user.service;
 
-import com.necrock.readingtracker.configuration.TestTimeConfig;
+import com.necrock.readingtracker.testsupport.configuration.TestTimeConfig;
 import com.necrock.readingtracker.exception.AlreadyExistsException;
 import com.necrock.readingtracker.exception.NotFoundException;
 import com.necrock.readingtracker.user.persistence.UserEntity;
@@ -61,7 +61,7 @@ class UserServiceTest {
     }
 
     @Test
-    void assUser_returnsSavedUser() {
+    void addUser_returnsSavedUser() {
         var username = "user";
         var email = "email@provider.com";
         var passwordHash = "#hash";
@@ -155,7 +155,7 @@ class UserServiceTest {
     }
 
     @Test
-    void activateUser_setsStatusToActive() {
+    void setUserStatus_setsNewUserStatus() {
         var id = 42L;
         UserEntity originalUserEntity =
                 testUserEntity(u -> u
@@ -164,7 +164,7 @@ class UserServiceTest {
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
 
-        service.activateUser(id);
+        service.setUserStatus(id, ACTIVE);
 
         var captor = ArgumentCaptor.forClass(UserEntity.class);
         verify(repository).save(captor.capture());
@@ -177,45 +177,12 @@ class UserServiceTest {
     }
 
     @Test
-    void activateUser_withUnknownId_throwsNotFoundException() {
+    void setUserStatus_withUnknownId_throwsNotFoundException() {
         var id = 42L;
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.activateUser(id))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("No user with id " + id);
-    }
-
-    @Test
-    void deleteUser_setsStatusToDeleted() {
-        var id = 42L;
-        UserEntity originalUserEntity =
-                testUserEntity(u -> u
-                        .setId(id)
-                        .setStatus(ACTIVE));
-
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
-
-        service.deleteUser(id);
-
-        var captor = ArgumentCaptor.forClass(UserEntity.class);
-        verify(repository).save(captor.capture());
-        UserEntity savedUserEntity = captor.getValue();
-        assertThat(savedUserEntity.getId()).isEqualTo(originalUserEntity.getId());
-        assertThat(savedUserEntity.getUsername()).isEqualTo(originalUserEntity.getUsername());
-        assertThat(savedUserEntity.getEmail()).isEqualTo(originalUserEntity.getEmail());
-        assertThat(savedUserEntity.getRole()).isEqualTo(originalUserEntity.getRole());
-        assertThat(savedUserEntity.getStatus()).isEqualTo(DELETED);
-    }
-
-    @Test
-    void deleteUser_withUnknownId_throwsNotFoundException() {
-        var id = 42L;
-
-        when(repository.findById(any(Long.class))).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.deleteUser(id))
+        assertThatThrownBy(() -> service.setUserStatus(id, ACTIVE))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("No user with id " + id);
     }

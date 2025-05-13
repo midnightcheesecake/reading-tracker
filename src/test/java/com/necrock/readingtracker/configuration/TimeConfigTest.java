@@ -5,9 +5,9 @@ import org.junit.jupiter.api.Test;
 
 import java.time.ZoneId;
 
-import static com.necrock.readingtracker.configuration.AppPropertiesTestSupport.PROPERTY_APP_TIMEZONE;
-import static com.necrock.readingtracker.configuration.AppPropertiesTestSupport.contextRunner;
-import static com.necrock.readingtracker.configuration.AppPropertiesTestSupport.validProperties;
+import static com.necrock.readingtracker.testsupport.configuration.AppPropertiesTestSupport.PROPERTY_APP_TIMEZONE;
+import static com.necrock.readingtracker.testsupport.configuration.AppPropertiesTestSupport.contextRunner;
+import static com.necrock.readingtracker.testsupport.configuration.AppPropertiesTestSupport.validProperties;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class TimeConfigTest {

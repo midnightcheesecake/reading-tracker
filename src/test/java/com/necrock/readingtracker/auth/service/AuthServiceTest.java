@@ -2,7 +2,7 @@ package com.necrock.readingtracker.auth.service;
 
 import com.necrock.readingtracker.auth.service.model.UserLogin;
 import com.necrock.readingtracker.auth.service.model.UserRegistration;
-import com.necrock.readingtracker.configuration.TestTimeConfig;
+import com.necrock.readingtracker.testsupport.configuration.TestTimeConfig;
 import com.necrock.readingtracker.exception.AlreadyExistsException;
 import com.necrock.readingtracker.exception.UnauthorizedException;
 import com.necrock.readingtracker.security.service.JwtService;

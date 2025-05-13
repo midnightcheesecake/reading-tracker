@@ -3,10 +3,10 @@ package com.necrock.readingtracker.configuration;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.context.properties.bind.validation.BindValidationException;
 
-import static com.necrock.readingtracker.configuration.AppPropertiesTestSupport.PROPERTY_APP_SIGNING_KEY;
-import static com.necrock.readingtracker.configuration.AppPropertiesTestSupport.PROPERTY_APP_TIMEZONE;
-import static com.necrock.readingtracker.configuration.AppPropertiesTestSupport.contextRunner;
-import static com.necrock.readingtracker.configuration.AppPropertiesTestSupport.validProperties;
+import static com.necrock.readingtracker.testsupport.configuration.AppPropertiesTestSupport.PROPERTY_APP_SIGNING_KEY;
+import static com.necrock.readingtracker.testsupport.configuration.AppPropertiesTestSupport.PROPERTY_APP_TIMEZONE;
+import static com.necrock.readingtracker.testsupport.configuration.AppPropertiesTestSupport.contextRunner;
+import static com.necrock.readingtracker.testsupport.configuration.AppPropertiesTestSupport.validProperties;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class AppPropertiesTest {

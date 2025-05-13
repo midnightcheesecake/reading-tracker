@@ -50,15 +50,9 @@ public class UserService {
         return saveUser(updatedUserBuilder.build());
     }
 
-    public void activateUser(long id) {
+    public void setUserStatus(long id, UserStatus newStatus) {
         var user = getUser(id);
-        var activatedUser = user.toBuilder().status(UserStatus.ACTIVE).build();
-        saveUser(activatedUser);
-    }
-
-    public void deleteUser(long id) {
-        var user = getUser(id);
-        var deletedUser = user.toBuilder().status(UserStatus.DELETED).build();
+        var deletedUser = user.toBuilder().status(newStatus).build();
         saveUser(deletedUser);
     }
 

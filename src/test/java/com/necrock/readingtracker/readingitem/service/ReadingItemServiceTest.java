@@ -1,7 +1,7 @@
 package com.necrock.readingtracker.readingitem.service;
 
 import com.google.common.collect.ImmutableList;
-import com.necrock.readingtracker.configuration.TestTimeConfig;
+import com.necrock.readingtracker.testsupport.configuration.TestTimeConfig;
 import com.necrock.readingtracker.exception.NotFoundException;
 import com.necrock.readingtracker.readingitem.persistence.ReadingItemEntity;
 import com.necrock.readingtracker.readingitem.persistence.ReadingItemRepository;

@@ -1,5 +1,6 @@
-package com.necrock.readingtracker.configuration;
+package com.necrock.readingtracker.testsupport.configuration;
 
+import com.necrock.readingtracker.configuration.AppProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;

@@ -4,6 +4,7 @@ import com.necrock.readingtracker.auth.api.dto.LoginRequest;
 import com.necrock.readingtracker.auth.api.dto.RegisterRequest;
 import com.necrock.readingtracker.auth.api.dto.RegisterResponse;
 import com.necrock.readingtracker.security.service.JwtService;
+import com.necrock.readingtracker.testsupport.auth.AuthTestClient;
 import com.necrock.readingtracker.user.persistence.UserEntity;
 import com.necrock.readingtracker.user.persistence.UserRepository;
 import org.junit.jupiter.api.Test;
@@ -20,7 +21,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(AuthTestClientConfig.class)
+@Import(AuthTestClient.Config.class)
 class AuthControllerTest {
 
     @Autowired

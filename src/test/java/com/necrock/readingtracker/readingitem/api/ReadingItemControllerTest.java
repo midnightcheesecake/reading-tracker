@@ -3,6 +3,7 @@ package com.necrock.readingtracker.readingitem.api;
 import com.necrock.readingtracker.readingitem.api.dto.CreateReadingItemDto;
 import com.necrock.readingtracker.readingitem.api.dto.ReadingItemDetailsDto;
 import com.necrock.readingtracker.readingitem.api.dto.UpdateReadingItemDto;
+import com.necrock.readingtracker.testsupport.readingitem.ReadingItemTestClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -17,7 +18,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Import(ReadingItemTestClientConfig.class)
+@Import(ReadingItemTestClient.Config.class)
 class ReadingItemControllerTest {
 
     @Autowired

@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import java.security.Key;
 
-import static com.necrock.readingtracker.configuration.AppPropertiesTestSupport.contextRunner;
-import static com.necrock.readingtracker.configuration.AppPropertiesTestSupport.validProperties;
+import static com.necrock.readingtracker.testsupport.configuration.AppPropertiesTestSupport.contextRunner;
+import static com.necrock.readingtracker.testsupport.configuration.AppPropertiesTestSupport.validProperties;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 class SecurityConfigTest {

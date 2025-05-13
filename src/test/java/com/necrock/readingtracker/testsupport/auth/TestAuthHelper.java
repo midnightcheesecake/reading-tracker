@@ -1,4 +1,4 @@
-package com.necrock.readingtracker.auth;
+package com.necrock.readingtracker.testsupport.auth;
 
 import com.necrock.readingtracker.security.service.JwtService;
 import com.necrock.readingtracker.user.persistence.UserEntity;
@@ -40,5 +40,9 @@ public class TestAuthHelper {
             userRepository.save(user);
         }
         return jwtService.generateToken(User.builder().username(username).build());
+    }
+
+    public String generateTokenFor(UserEntity testUser) {
+        return jwtService.generateToken(User.builder().username(testUser.getUsername()).build());
     }
 }

@@ -1,9 +1,11 @@
-package com.necrock.readingtracker.readingitem.api;
+package com.necrock.readingtracker.testsupport.readingitem;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.necrock.readingtracker.auth.TestAuthHelper;
+import com.necrock.readingtracker.testsupport.auth.TestAuthHelper;
 import com.necrock.readingtracker.readingitem.api.dto.CreateReadingItemDto;
 import com.necrock.readingtracker.readingitem.api.dto.UpdateReadingItemDto;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
@@ -63,5 +65,16 @@ public class ReadingItemTestClient {
     public <T> T parseResponse(ResultActions resultActions, Class<T> responseType) throws Exception {
         String content = resultActions.andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(content, responseType);
+    }
+
+    @TestConfiguration
+    public static class Config {
+        @Bean
+        public ReadingItemTestClient readingItemTestClient(
+                MockMvc mockMvc,
+                ObjectMapper objectMapper,
+                TestAuthHelper testAuthHelper) {
+            return new ReadingItemTestClient(mockMvc, objectMapper, testAuthHelper);
+        }
     }
 }

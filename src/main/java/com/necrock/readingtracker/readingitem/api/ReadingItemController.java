@@ -32,6 +32,11 @@ public class ReadingItemController {
         this.mapper = mapper;
     }
 
+    @GetMapping("/{id}")
+    public ReadingItemDetailsDto getItem(@PathVariable Long id) {
+        return mapper.toDetailsDto(service.getReadingItem(id));
+    }
+
     @GetMapping
     public ImmutableList<ReadingItemDetailsDto> getAllItems() {
         return service.getAllReadingItems().stream()
@@ -54,10 +59,5 @@ public class ReadingItemController {
     @ResponseStatus(NO_CONTENT)
     public void deleteItem(@PathVariable Long id) {
         service.deleteReadingItem(id);
-    }
-
-    @GetMapping("/{id}")
-    public ReadingItemDetailsDto getItem(@PathVariable Long id) {
-        return mapper.toDetailsDto(service.getReadingItem(id));
     }
 }
