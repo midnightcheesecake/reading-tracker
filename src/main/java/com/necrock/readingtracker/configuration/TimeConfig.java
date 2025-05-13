@@ -1,7 +1,6 @@
 package com.necrock.readingtracker.configuration;
 
 import com.necrock.readingtracker.configuration.exception.InvalidTimezoneException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -12,8 +11,11 @@ import java.time.ZoneId;
 @Configuration
 public class TimeConfig {
 
-    @Value("${app.timezone:UTC}")
-    private String zoneId;
+    private final AppProperties properties;
+
+    public TimeConfig(AppProperties properties) {
+        this.properties = properties;
+    }
 
     @Bean
     public Clock clock(ZoneId zoneId) {
@@ -23,9 +25,9 @@ public class TimeConfig {
     @Bean
     public ZoneId zoneId() {
         try {
-            return ZoneId.of(zoneId);
+            return ZoneId.of(properties.getTimezone());
         } catch (DateTimeException unused) {
-            throw new InvalidTimezoneException(zoneId);
+            throw new InvalidTimezoneException(properties.getTimezone());
         }
     }
 }
