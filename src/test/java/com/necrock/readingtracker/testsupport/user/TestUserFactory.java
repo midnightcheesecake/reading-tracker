@@ -32,6 +32,12 @@ public class TestUserFactory {
     }
 
     public UserEntity createUser(String username, UserRole role, UserStatus status) {
+        var maybeUser = userRepository.findByUsername(username);
+        return maybeUser.map(userEntity -> overrideExistingUser(userEntity, role, status))
+                .orElseGet(() -> createNewUser(username, role, status));
+    }
+
+    private UserEntity createNewUser(String username, UserRole role, UserStatus status) {
         UserEntity user = UserEntity.builder()
                 .setUsername(username)
                 .setPasswordHash(passwordEncoder.encode("testPass123"))
@@ -39,6 +45,19 @@ public class TestUserFactory {
                 .setRole(role)
                 .setStatus(status)
                 .setCreatedAt(Instant.now(clock))
+                .build();
+        return userRepository.save(user);
+    }
+
+    private UserEntity overrideExistingUser(UserEntity existingUser, UserRole role, UserStatus status) {
+        UserEntity user = UserEntity.builder()
+                .setId(existingUser.getId())
+                .setUsername(existingUser.getUsername())
+                .setPasswordHash(existingUser.getPasswordHash())
+                .setEmail(existingUser.getEmail())
+                .setRole(role)
+                .setStatus(status)
+                .setCreatedAt(existingUser.getCreatedAt())
                 .build();
         return userRepository.save(user);
     }
