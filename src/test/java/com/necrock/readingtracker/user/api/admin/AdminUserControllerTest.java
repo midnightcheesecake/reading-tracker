@@ -40,13 +40,13 @@ class AdminUserControllerTest {
 
     @Test
     public void getUser_returns200Ok() throws Exception {
-        testClient.getUser(testUser.getId())
+        testClient.runAsAdmin().getUser(testUser.getId())
                 .andExpect(status().isOk());
     }
 
     @Test
     public void getUser_returnsUser() throws Exception {
-        var result = testClient.getUser(testUser.getId());
+        var result = testClient.runAsAdmin().getUser(testUser.getId());
 
         var responseDto = testClient.parseResponse(result, AdminUserDetailsDto.class);
         assertThat(responseDto.getId()).isEqualTo(testUser.getId());
@@ -57,7 +57,7 @@ class AdminUserControllerTest {
 
     @Test
     public void getUser_withUnknownId_returns404NotFound() throws Exception {
-        testClient.getUser(98765)
+        testClient.runAsAdmin().getUser(98765)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.type").value("NOT_FOUND_ERROR"))
                 .andExpect(jsonPath("$.message").value("No user with id 98765"));
@@ -67,7 +67,7 @@ class AdminUserControllerTest {
     public void setUserStatus_returns200Ok() throws Exception {
         var request = new UpdateUserStatusRequest(UserStatus.DELETED);
 
-        testClient.setUserStatus(testUser.getId(), request)
+        testClient.runAsAdmin().setUserStatus(testUser.getId(), request)
                 .andExpect(status().isOk());
     }
 
@@ -75,9 +75,10 @@ class AdminUserControllerTest {
     public void setUserStatus_updatesUserStatus() throws Exception {
         var request = new UpdateUserStatusRequest(UserStatus.DELETED);
 
-        testClient.setUserStatus(testUser.getId(), request).andReturn();
+        testClient.runAsAdmin().setUserStatus(testUser.getId(), request).andReturn();
 
-        var userDto = testClient.parseResponse(testClient.getUser(testUser.getId()), AdminUserDetailsDto.class);
+        var userDto = testClient.parseResponse(
+                testClient.getUser(testUser.getId()), AdminUserDetailsDto.class);
         assertThat(userDto.getStatus()).isEqualTo(UserStatus.DELETED);
     }
 
@@ -85,7 +86,7 @@ class AdminUserControllerTest {
     public void setUserStatus_withUnknownId_returns404NotFound() throws Exception {
         var request = new UpdateUserStatusRequest(UserStatus.DELETED);
 
-        testClient.setUserStatus(98765, request)
+        testClient.runAsAdmin().setUserStatus(98765, request)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.type").value("NOT_FOUND_ERROR"))
                 .andExpect(jsonPath("$.message").value("No user with id 98765"));
@@ -95,7 +96,7 @@ class AdminUserControllerTest {
     public void setUserRole_returns200Ok() throws Exception {
         var request = new UpdateUserRoleRequest(UserRole.ADMIN);
 
-        testClient.setUserRole(testUser.getId(), request)
+        testClient.runAsAdmin().setUserRole(testUser.getId(), request)
                 .andExpect(status().isOk());
     }
 
@@ -103,16 +104,17 @@ class AdminUserControllerTest {
     public void setUserRole_updatesUserRole() throws Exception {
         var request = new UpdateUserRoleRequest(UserRole.ADMIN);
 
-        testClient.setUserRole(testUser.getId(), request).andReturn();
+        testClient.runAsAdmin().setUserRole(testUser.getId(), request).andReturn();
 
-        var userDto = testClient.parseResponse(testClient.getUser(testUser.getId()), AdminUserDetailsDto.class);
+        var userDto = testClient.parseResponse(
+                testClient.getUser(testUser.getId()), AdminUserDetailsDto.class);
         assertThat(userDto.getRole()).isEqualTo(UserRole.ADMIN);
     }
 
     @Test
     public void setUserRole_withUnknownId_returns404NotFound() throws Exception {
         var request = new UpdateUserRoleRequest(UserRole.ADMIN);
-        testClient.setUserRole(98765, request)
+        testClient.runAsAdmin().setUserRole(98765, request)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.type").value("NOT_FOUND_ERROR"))
                 .andExpect(jsonPath("$.message").value("No user with id 98765"));

@@ -3,10 +3,12 @@ package com.necrock.readingtracker.configuration;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 
 import java.security.Key;
 import java.util.Base64;
 
+@EnableMethodSecurity
 @Configuration
 public class SecurityConfig {
 
