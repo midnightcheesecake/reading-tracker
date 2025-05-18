@@ -118,6 +118,7 @@ class UserServiceTest {
         assertThat(savedUserEntity.getId()).isEqualTo(originalUserEntity.getId());
         assertThat(savedUserEntity.getUsername()).isEqualTo(originalUserEntity.getUsername());
         assertThat(savedUserEntity.getEmail()).isEqualTo(updateMask.getEmail());
+        assertThat(savedUserEntity.getPasswordHash()).isEqualTo(originalUserEntity.getPasswordHash());
         assertThat(savedUserEntity.getRole()).isEqualTo(originalUserEntity.getRole());
         assertThat(savedUserEntity.getStatus()).isEqualTo(originalUserEntity.getStatus());
     }
@@ -155,40 +156,7 @@ class UserServiceTest {
     }
 
     @Test
-    void setUserStatus_setsNewUserStatus() {
-        var id = 42L;
-        UserEntity originalUserEntity =
-                testUserEntity(u -> u
-                        .setId(id)
-                        .setStatus(DELETED));
-
-        when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
-
-        service.setUserStatus(id, ACTIVE);
-
-        var captor = ArgumentCaptor.forClass(UserEntity.class);
-        verify(repository).save(captor.capture());
-        UserEntity savedUserEntity = captor.getValue();
-        assertThat(savedUserEntity.getId()).isEqualTo(originalUserEntity.getId());
-        assertThat(savedUserEntity.getUsername()).isEqualTo(originalUserEntity.getUsername());
-        assertThat(savedUserEntity.getEmail()).isEqualTo(originalUserEntity.getEmail());
-        assertThat(savedUserEntity.getRole()).isEqualTo(originalUserEntity.getRole());
-        assertThat(savedUserEntity.getStatus()).isEqualTo(ACTIVE);
-    }
-
-    @Test
-    void setUserStatus_withUnknownId_throwsNotFoundException() {
-        var id = 42L;
-
-        when(repository.findById(any(Long.class))).thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.setUserStatus(id, ACTIVE))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("No user with id " + id);
-    }
-
-    @Test
-    void getUser_findsUserById() {
+    void getUser_withId_findsUserById() {
         var id = 42L;
         UserEntity userEntity = testUserEntity(u -> u.setId(id));
 
@@ -202,7 +170,7 @@ class UserServiceTest {
     }
 
     @Test
-    void getUser_returnsUser() {
+    void getUser_withId_returnsUser() {
         var id = 42L;
         UserEntity userEntity = testUserEntity(u -> u.setId(id));
 
@@ -225,7 +193,7 @@ class UserServiceTest {
     }
 
     @Test
-    void getUserByUsername_findsUser() {
+    void getUser_usingUsername_findsUser() {
         var username = "user";
         UserEntity userEntity = testUserEntity(u -> u.setUsername(username));
 
@@ -239,7 +207,7 @@ class UserServiceTest {
     }
 
     @Test
-    void getUserByUsername_returnsUser() {
+    void getUser_usingUsername_returnsUser() {
         var username = "user";
         UserEntity userEntity = testUserEntity(u -> u.setUsername(username));
 
@@ -251,7 +219,7 @@ class UserServiceTest {
     }
 
     @Test
-    void getUser_throwsNotFoundException() {
+    void getUser_withUnknownUsername_throwsNotFoundException() {
         var username = "non-existent";
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.empty());
@@ -262,7 +230,76 @@ class UserServiceTest {
     }
 
     @Test
-    void assignUserRole_setsNewUserRole() {
+    void setPassword_setsNewPassword() {
+        var id = 42L;
+        var newPasswordHash = "#newPasswordHash";
+        UserEntity originalUserEntity =
+                testUserEntity(u -> u
+                        .setId(id)
+                        .setStatus(DELETED));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
+
+        service.setPassword(id, newPasswordHash);
+
+        var captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(repository).save(captor.capture());
+        UserEntity savedUserEntity = captor.getValue();
+        assertThat(savedUserEntity.getId()).isEqualTo(originalUserEntity.getId());
+        assertThat(savedUserEntity.getUsername()).isEqualTo(originalUserEntity.getUsername());
+        assertThat(savedUserEntity.getPasswordHash()).isEqualTo(newPasswordHash);
+        assertThat(savedUserEntity.getEmail()).isEqualTo(originalUserEntity.getEmail());
+        assertThat(savedUserEntity.getRole()).isEqualTo(originalUserEntity.getRole());
+        assertThat(savedUserEntity.getStatus()).isEqualTo(originalUserEntity.getStatus());
+    }
+
+    @Test
+    void setPassword_withUnknownId_throwsNotFoundException() {
+        var id = 42L;
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.setPassword(id, "#newHash"))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("No user with id " + id);
+    }
+
+    @Test
+    void setUserStatus_setsNewUserStatus() {
+        var id = 42L;
+        UserEntity originalUserEntity =
+                testUserEntity(u -> u
+                        .setId(id)
+                        .setStatus(DELETED));
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
+
+        service.setUserStatus(id, ACTIVE);
+
+        var captor = ArgumentCaptor.forClass(UserEntity.class);
+        verify(repository).save(captor.capture());
+        UserEntity savedUserEntity = captor.getValue();
+        assertThat(savedUserEntity.getId()).isEqualTo(originalUserEntity.getId());
+        assertThat(savedUserEntity.getUsername()).isEqualTo(originalUserEntity.getUsername());
+        assertThat(savedUserEntity.getEmail()).isEqualTo(originalUserEntity.getEmail());
+        assertThat(savedUserEntity.getPasswordHash()).isEqualTo(originalUserEntity.getPasswordHash());
+        assertThat(savedUserEntity.getRole()).isEqualTo(originalUserEntity.getRole());
+        assertThat(savedUserEntity.getStatus()).isEqualTo(ACTIVE);
+    }
+
+    @Test
+    void setUserStatus_withUnknownId_throwsNotFoundException() {
+        var id = 42L;
+
+        when(repository.findById(any(Long.class))).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> service.setUserStatus(id, ACTIVE))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("No user with id " + id);
+    }
+
+    @Test
+    void setUserRole_setsNewUserRole() {
         var id = 42L;
         UserEntity originalUserEntity =
                 testUserEntity(u -> u
@@ -271,7 +308,7 @@ class UserServiceTest {
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
 
-        service.assignUserRole(id, USER);
+        service.setUserRole(id, USER);
 
         var captor = ArgumentCaptor.forClass(UserEntity.class);
         verify(repository, times(1)).save(captor.capture());
@@ -279,17 +316,18 @@ class UserServiceTest {
         assertThat(savedUserEntity.getId()).isEqualTo(originalUserEntity.getId());
         assertThat(savedUserEntity.getUsername()).isEqualTo(originalUserEntity.getUsername());
         assertThat(savedUserEntity.getEmail()).isEqualTo(originalUserEntity.getEmail());
+        assertThat(savedUserEntity.getPasswordHash()).isEqualTo(originalUserEntity.getPasswordHash());
         assertThat(savedUserEntity.getRole()).isEqualTo(USER);
         assertThat(savedUserEntity.getStatus()).isEqualTo(originalUserEntity.getStatus());
     }
 
     @Test
-    void assignUserRole_withUnknownId_throwsNotFoundException() {
+    void setUserRole_withUnknownId_throwsNotFoundException() {
         var id = 42L;
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.assignUserRole(id, ADMIN))
+        assertThatThrownBy(() -> service.setUserRole(id, ADMIN))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("No user with id " + id);
     }

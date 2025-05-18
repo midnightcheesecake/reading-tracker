@@ -38,6 +38,6 @@ public class AdminUserController {
 
     @PutMapping("/{id}/role")
     public void setUserRole(@PathVariable Long id, @Valid @RequestBody UpdateUserRoleRequest request) {
-        service.assignUserRole(id, request.role());
+        service.setUserRole(id, request.role());
     }
 }

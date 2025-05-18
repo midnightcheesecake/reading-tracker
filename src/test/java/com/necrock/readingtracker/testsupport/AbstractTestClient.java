@@ -3,6 +3,7 @@ package com.necrock.readingtracker.testsupport;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.necrock.readingtracker.security.service.JwtService;
 import com.necrock.readingtracker.testsupport.user.TestUserFactory;
+import com.necrock.readingtracker.user.persistence.UserEntity;
 import com.necrock.readingtracker.user.service.model.User;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
@@ -16,7 +17,7 @@ public abstract class AbstractTestClient<T extends AbstractTestClient<T>> {
     private final TestUserFactory testUserFactory;
     private final JwtService jwtService;
 
-    private boolean runAsAdmin;
+    private UserEntity runningUser;
 
     protected AbstractTestClient(
             MockMvc mvc,
@@ -27,18 +28,24 @@ public abstract class AbstractTestClient<T extends AbstractTestClient<T>> {
         this.objectMapper = objectMapper;
         this.testUserFactory = testUserFactory;
         this.jwtService = jwtService;
-        this.runAsAdmin = false;
+        this.runningUser = testUserFactory.createUser("actingTestUser");
     }
 
     @SuppressWarnings("unchecked")
     public T runAsAdmin() {
-        this.runAsAdmin = true;
+        this.runningUser = testUserFactory.createAdmin("actingTestUser");
         return (T) this;
     }
 
     @SuppressWarnings("unchecked")
     public T runAsRegularUser() {
-        this.runAsAdmin = false;
+        this.runningUser = testUserFactory.createUser("actingTestUser");
+        return (T) this;
+    }
+
+    @SuppressWarnings("unchecked")
+    public T runAsUser(UserEntity user) {
+        this.runningUser = user;
         return (T) this;
     }
 
@@ -81,15 +88,12 @@ public abstract class AbstractTestClient<T extends AbstractTestClient<T>> {
                         .header("Authorization", "Bearer " + getAuthToken()));
     }
 
-    public <T> T parseResponse(ResultActions resultActions, Class<T> responseType) throws Exception {
+    public <R> R parseResponse(ResultActions resultActions, Class<R> responseType) throws Exception {
         String content = resultActions.andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(content, responseType);
     }
 
     private String getAuthToken() {
-        var userEntity = runAsAdmin
-                ? testUserFactory.createAdmin("actingTestUser")
-                : testUserFactory.createUser("actingTestUser");
-        return jwtService.generateToken(User.builder().username(userEntity.getUsername()).build());
+        return jwtService.generateToken(User.builder().username(runningUser.getUsername()).build());
     }
 }

@@ -3,17 +3,17 @@ package com.necrock.readingtracker.testsupport.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.necrock.readingtracker.security.service.JwtService;
 import com.necrock.readingtracker.testsupport.AbstractTestClient;
-import com.necrock.readingtracker.user.api.admin.dto.UpdateUserRoleRequest;
-import com.necrock.readingtracker.user.api.admin.dto.UpdateUserStatusRequest;
+import com.necrock.readingtracker.user.api.self.dto.UpdatePasswordRequest;
+import com.necrock.readingtracker.user.api.self.dto.UpdateUserDetailsRequest;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 
-public class AdminUserTestClient extends AbstractTestClient<AdminUserTestClient> {
+public class SelfUserTestClient extends AbstractTestClient<SelfUserTestClient> {
 
-    private AdminUserTestClient(
+    private SelfUserTestClient(
             MockMvc mvc,
             ObjectMapper objectMapper,
             TestUserFactory testUserFactory,
@@ -21,16 +21,20 @@ public class AdminUserTestClient extends AbstractTestClient<AdminUserTestClient>
         super(mvc, objectMapper, testUserFactory, jwtService);
     }
 
-    public ResultActions getUser(long id) throws Exception {
-        return get("/api/users/" + id);
+    public ResultActions getUser() throws Exception{
+        return get("/api/me");
     }
 
-    public ResultActions setUserStatus(long id, UpdateUserStatusRequest request) throws Exception {
-        return put("/api/users/" + id + "/status", request);
+    public ResultActions updateUser(UpdateUserDetailsRequest request) throws Exception {
+        return patch("/api/me", request);
     }
 
-    public ResultActions setUserRole(long id, UpdateUserRoleRequest request) throws Exception {
-        return put("/api/users/" + id + "/role", request);
+    public ResultActions setNewPassword(UpdatePasswordRequest request) throws Exception {
+        return put("/api/me/password", request);
+    }
+
+    public ResultActions deleteUser() throws Exception {
+        return delete("/api/me");
     }
 
     @TestConfiguration
@@ -38,12 +42,12 @@ public class AdminUserTestClient extends AbstractTestClient<AdminUserTestClient>
     public static class Config {
 
         @Bean
-        public AdminUserTestClient adminUserTestClient(
+        public SelfUserTestClient selfUserTestClient(
                 MockMvc mockMvc,
                 ObjectMapper objectMapper,
                 TestUserFactory testUserFactory,
                 JwtService jwtService) {
-            return new AdminUserTestClient(mockMvc, objectMapper, testUserFactory, jwtService);
+            return new SelfUserTestClient(mockMvc, objectMapper, testUserFactory, jwtService);
         }
     }
 }

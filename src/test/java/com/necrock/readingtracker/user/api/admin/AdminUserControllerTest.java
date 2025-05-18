@@ -8,6 +8,7 @@ import com.necrock.readingtracker.user.api.admin.dto.UpdateUserStatusRequest;
 import com.necrock.readingtracker.user.common.UserRole;
 import com.necrock.readingtracker.user.common.UserStatus;
 import com.necrock.readingtracker.user.persistence.UserEntity;
+import com.necrock.readingtracker.user.persistence.UserRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,24 +29,24 @@ class AdminUserControllerTest {
 
     @Autowired
     AdminUserTestClient testClient;
+
     @Autowired
     TestUserFactory testUserFactory;
-
-    private UserEntity testUser;
-
-    @BeforeEach
-    void setup() {
-        testUser = testUserFactory.createUser("target-user");
-    }
+    @Autowired
+    UserRepository userRepository;
 
     @Test
     public void getUser_returns200Ok() throws Exception {
+        var testUser = testUserFactory.createUser("target-user");
+
         testClient.runAsAdmin().getUser(testUser.getId())
                 .andExpect(status().isOk());
     }
 
     @Test
     public void getUser_returnsUser() throws Exception {
+        var testUser = testUserFactory.createUser("target-user");
+
         var result = testClient.runAsAdmin().getUser(testUser.getId());
 
         var responseDto = testClient.parseResponse(result, AdminUserDetailsDto.class);
@@ -65,6 +66,7 @@ class AdminUserControllerTest {
 
     @Test
     public void setUserStatus_returns200Ok() throws Exception {
+        var testUser = testUserFactory.createUser("target-user");
         var request = new UpdateUserStatusRequest(UserStatus.DELETED);
 
         testClient.runAsAdmin().setUserStatus(testUser.getId(), request)
@@ -72,14 +74,13 @@ class AdminUserControllerTest {
     }
 
     @Test
-    public void setUserStatus_updatesUserStatus() throws Exception {
+    public void setUserStatus_changesUserStatus() throws Exception {
+        var testUser = testUserFactory.createUser("target-user");
         var request = new UpdateUserStatusRequest(UserStatus.DELETED);
 
         testClient.runAsAdmin().setUserStatus(testUser.getId(), request).andReturn();
 
-        var userDto = testClient.parseResponse(
-                testClient.getUser(testUser.getId()), AdminUserDetailsDto.class);
-        assertThat(userDto.getStatus()).isEqualTo(UserStatus.DELETED);
+        assertThat(getCurrentUser(testUser).getStatus()).isEqualTo(UserStatus.DELETED);
     }
 
     @Test
@@ -94,6 +95,7 @@ class AdminUserControllerTest {
 
     @Test
     public void setUserRole_returns200Ok() throws Exception {
+        var testUser = testUserFactory.createUser("target-user");
         var request = new UpdateUserRoleRequest(UserRole.ADMIN);
 
         testClient.runAsAdmin().setUserRole(testUser.getId(), request)
@@ -101,22 +103,26 @@ class AdminUserControllerTest {
     }
 
     @Test
-    public void setUserRole_updatesUserRole() throws Exception {
+    public void setUserRole_changesUserRole() throws Exception {
+        var testUser = testUserFactory.createUser("target-user");
         var request = new UpdateUserRoleRequest(UserRole.ADMIN);
 
         testClient.runAsAdmin().setUserRole(testUser.getId(), request).andReturn();
 
-        var userDto = testClient.parseResponse(
-                testClient.getUser(testUser.getId()), AdminUserDetailsDto.class);
-        assertThat(userDto.getRole()).isEqualTo(UserRole.ADMIN);
+        assertThat(getCurrentUser(testUser).getRole()).isEqualTo(UserRole.ADMIN);
     }
 
     @Test
     public void setUserRole_withUnknownId_returns404NotFound() throws Exception {
         var request = new UpdateUserRoleRequest(UserRole.ADMIN);
+
         testClient.runAsAdmin().setUserRole(98765, request)
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.type").value("NOT_FOUND_ERROR"))
                 .andExpect(jsonPath("$.message").value("No user with id 98765"));
+    }
+
+    private UserEntity getCurrentUser(UserEntity testUser) {
+        return userRepository.findById(testUser.getId()).orElseThrow();
     }
 }

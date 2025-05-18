@@ -17,7 +17,10 @@ public class TestUserFactory {
     private final PasswordEncoder passwordEncoder;
     private final Clock clock;
 
-    public TestUserFactory(UserRepository userRepository, PasswordEncoder passwordEncoder, Clock clock) {
+    private TestUserFactory(
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder,
+            Clock clock) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.clock = clock;

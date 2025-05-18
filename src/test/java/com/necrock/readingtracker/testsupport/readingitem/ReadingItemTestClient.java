@@ -14,7 +14,7 @@ import org.springframework.test.web.servlet.ResultActions;
 
 public class ReadingItemTestClient extends AbstractTestClient<ReadingItemTestClient> {
 
-    public ReadingItemTestClient(
+    private ReadingItemTestClient(
             MockMvc mvc,
             ObjectMapper objectMapper,
             TestUserFactory testUserFactory,

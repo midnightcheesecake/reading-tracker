@@ -43,20 +43,23 @@ public class UserService {
         if (user.getEmail() != null) {
             updatedUserBuilder.email(user.getEmail());
         }
-        if (user.getPasswordHash() != null) {
-            updatedUserBuilder.passwordHash(user.getPasswordHash());
-        }
 
         return saveUser(updatedUserBuilder.build());
     }
 
-    public void setUserStatus(long id, UserStatus newStatus) {
+    public void setPassword(long id, String passwordHash) {
         var user = getUser(id);
-        var deletedUser = user.toBuilder().status(newStatus).build();
-        saveUser(deletedUser);
+        var updatedUser = user.toBuilder().passwordHash(passwordHash).build();
+        saveUser(updatedUser);
     }
 
-    public void assignUserRole(long id, UserRole newRole) {
+    public void setUserStatus(long id, UserStatus newStatus) {
+        var user = getUser(id);
+        var updatedUser = user.toBuilder().status(newStatus).build();
+        saveUser(updatedUser);
+    }
+
+    public void setUserRole(long id, UserRole newRole) {
         var user = getUser(id);
         var updatedUser = user.toBuilder().role(newRole).build();
         saveUser(updatedUser);
