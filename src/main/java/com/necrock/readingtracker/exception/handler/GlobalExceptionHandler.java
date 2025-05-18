@@ -5,6 +5,7 @@ import com.necrock.readingtracker.exception.NotFoundException;
 import com.necrock.readingtracker.exception.UnauthorizedException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -73,6 +74,12 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiError> handleAccessDenied(AccessDeniedException ex) {
+        var apiError = new ApiError(UNAUTHORIZED_ERROR, ex.getMessage());
+        return ResponseEntity.status(FORBIDDEN).body(apiError);
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiError> handleDisabledUser(DisabledException ex) {
         var apiError = new ApiError(UNAUTHORIZED_ERROR, ex.getMessage());
         return ResponseEntity.status(FORBIDDEN).body(apiError);
     }

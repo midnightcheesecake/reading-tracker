@@ -1,8 +1,11 @@
 package com.necrock.readingtracker.security.service;
 
+import com.necrock.readingtracker.exception.UnauthorizedException;
 import com.necrock.readingtracker.user.service.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -11,6 +14,8 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 
+import static com.necrock.readingtracker.user.common.UserStatus.ACTIVE;
+
 @Service
 public class JwtService {
 
@@ -18,10 +23,12 @@ public class JwtService {
 
     private final Key signingKey;
     private final Clock clock;
+    private final CustomUserDetailsService userDetailsService;
 
-    public JwtService(Key signingKey, Clock clock) {
+    public JwtService(Key signingKey, Clock clock, CustomUserDetailsService userDetailsService) {
         this.signingKey = signingKey;
         this.clock = clock;
+        this.userDetailsService = userDetailsService;
     }
 
     public String generateToken(User user) {
@@ -52,6 +59,17 @@ public class JwtService {
 
         public String getUsername() {
             return claims.getSubject();
+        }
+
+        public UserDetails getUserDetails() {
+            return userDetailsService.loadUserByUsername(getUsername());
+        }
+
+        public void validate() {
+            var userDetails = getUserDetails();
+            if (!userDetails.isEnabled()) {
+                throw new DisabledException("User is disabled");
+            }
         }
     }
 }

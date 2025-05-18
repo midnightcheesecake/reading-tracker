@@ -15,7 +15,7 @@ public class AuthTestClient {
     private final MockMvc mvc;
     private final ObjectMapper objectMapper;
 
-    public AuthTestClient(MockMvc mvc, ObjectMapper objectMapper) {
+    private AuthTestClient(MockMvc mvc, ObjectMapper objectMapper) {
         this.mvc = mvc;
         this.objectMapper = objectMapper;
     }

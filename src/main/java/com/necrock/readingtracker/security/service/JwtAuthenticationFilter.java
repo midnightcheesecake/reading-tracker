@@ -1,12 +1,15 @@
 package com.necrock.readingtracker.security.service;
 
-import com.necrock.readingtracker.exception.UnauthorizedException;
+import com.necrock.readingtracker.exception.handler.ApiError;
+import com.necrock.readingtracker.exception.handler.ErrorResponseWriter;
+import com.necrock.readingtracker.exception.handler.ErrorType;
 import io.jsonwebtoken.JwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,11 +24,11 @@ import java.util.Optional;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final CustomUserDetailsService userDetailsService;
+    private final ErrorResponseWriter errorResponseWriter;
 
-    public JwtAuthenticationFilter(JwtService jwtService, CustomUserDetailsService userDetailsService) {
+    public JwtAuthenticationFilter(JwtService jwtService, ErrorResponseWriter errorResponseWriter) {
         this.jwtService = jwtService;
-        this.userDetailsService = userDetailsService;
+        this.errorResponseWriter = errorResponseWriter;
     }
 
     @Override
@@ -37,7 +40,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     .ifPresent(this::authenticateRequest);
             filterChain.doFilter(request, response);
         } catch (JwtException | UsernameNotFoundException e) {
-            throw new UnauthorizedException("Invalid authentication token");
+            var error = new ApiError(ErrorType.UNAUTHORIZED_ERROR, "Invalid authentication token");
+            errorResponseWriter.write(response, HttpServletResponse.SC_FORBIDDEN, error);
+        } catch (DisabledException ex) {
+            var error = new ApiError(ErrorType.UNAUTHORIZED_ERROR, "User account is disabled");
+            errorResponseWriter.write(response, HttpServletResponse.SC_FORBIDDEN, error);
         }
     }
 
@@ -51,11 +58,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private void authenticateRequest(JwtService.Token token) {
-        String username = token.getUsername();
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        if (token.getUsername() != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+            token.validate();
+            UserDetails userDetails = token.getUserDetails();
 
-            // Token validity implicitly checked during parsing (signature, expiry)
             var authToken =
                     new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
             SecurityContextHolder.getContext().setAuthentication(authToken);
