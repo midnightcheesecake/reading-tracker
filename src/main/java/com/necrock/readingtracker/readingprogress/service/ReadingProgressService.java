@@ -68,6 +68,16 @@ public class ReadingProgressService {
                                 readingItem.getId())));
     }
 
+    public ReadingProgress getReadingProgress(User user, Long readingItemId) {
+        return repository.findByUserIdAndReadingItemId(user.getId(), readingItemId)
+                .map(mapper::toDomainModel)
+                .orElseThrow(() -> new NotFoundException(
+                        String.format(
+                                "No reading progress for user %d and reading item %d",
+                                user.getId(),
+                                readingItemId)));
+    }
+
     public ImmutableList<ReadingProgress> getAllReadingProgressForUser(User user) {
         return repository.findAllByUserId(user.getId()).stream()
                 .map(mapper::toDomainModel)
@@ -86,8 +96,8 @@ public class ReadingProgressService {
     }
 
     public void deleteReadingProgress(Long id) {
-        var item = repository.findById(id)
+        var progress = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("No reading progress with id %d", id)));
-        repository.delete(item);
+        progress.getReadingItem().removeProgress(progress);
     }
 }

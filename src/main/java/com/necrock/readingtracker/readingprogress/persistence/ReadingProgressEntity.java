@@ -61,6 +61,7 @@ public class ReadingProgressEntity {
         this.id = id;
         this.user = user;
         this.readingItem = readingItem;
+        readingItem.addProgress(this);
         this.lastReadChapter = lastReadChapter;
     }
 

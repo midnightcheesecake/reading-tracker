@@ -1,14 +1,19 @@
 package com.necrock.readingtracker.readingitem.persistence;
 
 import com.necrock.readingtracker.readingitem.common.ReadingItemType;
+import com.necrock.readingtracker.readingprogress.persistence.ReadingProgressEntity;
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -31,6 +36,9 @@ public class ReadingItemEntity {
     private Integer totalChapters;
 
     private Instant createdAt;
+
+    @OneToMany(mappedBy = "readingItem", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReadingProgressEntity> progressList = new ArrayList<>();
 
     private ReadingItemEntity(Long id,
                               String title,
@@ -79,6 +87,14 @@ public class ReadingItemEntity {
 
     public Instant getCreatedAt() {
         return createdAt;
+    }
+
+    public void addProgress(ReadingProgressEntity progress) {
+        progressList.add(progress);
+    }
+
+    public void removeProgress(ReadingProgressEntity progress) {
+        progressList.remove(progress);
     }
 
     @Override

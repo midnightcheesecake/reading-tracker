@@ -8,6 +8,7 @@ import com.necrock.readingtracker.readingitem.persistence.ReadingItemRepository;
 import com.necrock.readingtracker.user.common.UserRole;
 import com.necrock.readingtracker.user.persistence.UserEntity;
 import com.necrock.readingtracker.user.persistence.UserRepository;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 @Transactional
 @DataJpaTest
@@ -32,6 +34,9 @@ class SafeReadingProgressRepositoryTest {
     private UserRepository userRepository;
     @Autowired
     private ReadingItemRepository readingItemRepository;
+
+    @Autowired
+    EntityManager entityManager;
 
     @BeforeEach
     void setUp() {
@@ -200,7 +205,53 @@ class SafeReadingProgressRepositoryTest {
     }
 
     @Test
-    void findAllByUser_returnsAllProgressForUser() {}
+    void findAllByUser_returnsAllProgressForUser() {
+        var user = createUser();
+        ReadingProgressEntity progress1 = ReadingProgressEntity.builder()
+                .user(user)
+                .readingItem(createReadingItem())
+                .lastReadChapter(10)
+                .build();
+        ReadingProgressEntity progress2 = ReadingProgressEntity.builder()
+                .user(user)
+                .readingItem(createReadingItem())
+                .lastReadChapter(12)
+                .build();
+
+        repository.save(progress1);
+        repository.save(progress2);
+
+        var foundProgressList = repository.findAllByUserId(user.getId());
+
+        assertThat(foundProgressList).hasSize(2);
+        assertThat(foundProgressList).anySatisfy(foundProgress -> {
+            assertThat(foundProgress.getUser()).isEqualTo(progress1.getUser());
+            assertThat(foundProgress.getReadingItem()).isEqualTo(progress1.getReadingItem());
+            assertThat(foundProgress.getLastReadChapter()).isEqualTo(progress1.getLastReadChapter());
+        });
+        assertThat(foundProgressList).anySatisfy(foundProgress -> {
+            assertThat(foundProgress.getUser()).isEqualTo(progress2.getUser());
+            assertThat(foundProgress.getReadingItem()).isEqualTo(progress2.getReadingItem());
+            assertThat(foundProgress.getLastReadChapter()).isEqualTo(progress2.getLastReadChapter());
+        });
+    }
+
+    @Test
+    void deleteReadingItem_deletesReadingProgressForReadingItem() {
+        var readingItem = createReadingItem();
+        ReadingProgressEntity progress = ReadingProgressEntity.builder()
+                .user(createUser())
+                .readingItem(readingItem)
+                .lastReadChapter(10)
+                .build();
+
+        repository.saveAndFlush(progress);
+
+        readingItemRepository.delete(readingItem);
+        entityManager.flush();
+
+        assertThat(repository.findAll()).isEmpty();
+    }
 
     private UserEntity createUser() {
         UserEntity user = UserEntity.builder()
@@ -209,7 +260,7 @@ class SafeReadingProgressRepositoryTest {
                 .passwordHash("#hash")
                 .role(UserRole.USER)
                 .build();
-        return userRepository.save(user);
+        return userRepository.saveAndFlush(user);
     }
 
     private ReadingItemEntity createReadingItem() {
@@ -219,6 +270,6 @@ class SafeReadingProgressRepositoryTest {
                 .type(ReadingItemType.BOOK)
                 .totalChapters(20)
                 .build();
-        return readingItemRepository.save(readingItem);
+        return readingItemRepository.saveAndFlush(readingItem);
     }
 }

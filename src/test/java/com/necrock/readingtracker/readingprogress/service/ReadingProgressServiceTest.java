@@ -9,6 +9,7 @@ import com.necrock.readingtracker.readingitem.service.model.ReadingItem;
 import com.necrock.readingtracker.readingprogress.persistence.ReadingProgressEntity;
 import com.necrock.readingtracker.readingprogress.persistence.ReadingProgressRepository;
 import com.necrock.readingtracker.readingprogress.service.model.ReadingProgress;
+import com.necrock.readingtracker.testsupport.readingProgress.TestReadingProgressEntity;
 import com.necrock.readingtracker.user.persistence.UserEntity;
 import com.necrock.readingtracker.user.persistence.UserRepository;
 import com.necrock.readingtracker.user.service.model.User;
@@ -126,7 +127,8 @@ class ReadingProgressServiceTest {
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(UserEntity.builder().build()));
         when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(ReadingItemEntity.builder().build()));
 
-        when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class))).thenReturn(Optional.of(ReadingProgressEntity.builder().build()));
+        when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
+                .thenReturn(Optional.of(testReadingProgressEntityBuilder().build()));
 
         assertThatThrownBy(() -> service.addReadingProgress(
                 testReadingProgressBuilder().userId(userId).readingItemId(readingItemId).build()))
