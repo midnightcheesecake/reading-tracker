@@ -3,26 +3,27 @@ package com.necrock.readingtracker.readingitem.service.model;
 import com.necrock.readingtracker.readingitem.common.ReadingItemType;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public class ReadingItem {
     private final Long id;
     private final String title;
     private final ReadingItemType type;
     private final String author;
-    private final Integer numberChapters;
+    private final Integer totalChapters;
     private final Instant createdAt;
 
-    public ReadingItem(Long id,
+    private ReadingItem(Long id,
                        String title,
                        ReadingItemType type,
                        String author,
-                       Integer numberChapters,
+                       Integer totalChapters,
                        Instant createdAt) {
         this.id = id;
         this.title = title;
         this.type = type;
         this.author = author;
-        this.numberChapters = numberChapters;
+        this.totalChapters = totalChapters;
         this.createdAt = createdAt;
     }
 
@@ -46,8 +47,8 @@ public class ReadingItem {
         return author;
     }
 
-    public Integer getNumberChapters() {
-        return numberChapters;
+    public Integer getTotalChapters() {
+        return totalChapters;
     }
 
     public Instant getCreatedAt() {
@@ -60,8 +61,34 @@ public class ReadingItem {
                 .title(title)
                 .type(type)
                 .author(author)
-                .numberChapters(numberChapters)
+                .totalChapters(totalChapters)
                 .createdAt(createdAt);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ReadingItem that = (ReadingItem) o;
+        return Objects.equals(getId(), that.getId())
+                && Objects.equals(getTitle(), that.getTitle())
+                && getType() == that.getType()
+                && Objects.equals(getAuthor(), that.getAuthor())
+                && Objects.equals(getTotalChapters(), that.getTotalChapters())
+                && Objects.equals(getCreatedAt(), that.getCreatedAt());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                getId(),
+                getTitle(),
+                getType(),
+                getAuthor(),
+                getTotalChapters(),
+                getCreatedAt());
     }
 
     public static class Builder {
@@ -69,8 +96,10 @@ public class ReadingItem {
         private String title;
         private ReadingItemType type;
         private String author;
-        private Integer numberChapters;
+        private Integer totalChapters;
         private Instant createdAt;
+
+        public Builder() {}
 
         public Builder id(Long id) {
             this.id = id;
@@ -92,8 +121,8 @@ public class ReadingItem {
             return this;
         }
 
-        public Builder numberChapters(Integer numberChapters) {
-            this.numberChapters = numberChapters;
+        public Builder totalChapters(Integer totalChapters) {
+            this.totalChapters = totalChapters;
             return this;
         }
 
@@ -103,7 +132,7 @@ public class ReadingItem {
         }
 
         public ReadingItem build() {
-            return new ReadingItem(id, title, type, author, numberChapters, createdAt);
+            return new ReadingItem(id, title, type, author, totalChapters, createdAt);
         }
     }
 }

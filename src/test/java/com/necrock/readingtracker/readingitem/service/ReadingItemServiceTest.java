@@ -21,7 +21,6 @@ import static com.necrock.readingtracker.readingitem.common.ReadingItemType.BOOK
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -54,7 +53,7 @@ class ReadingItemServiceTest {
                 .title("New Book")
                 .author("A. U. Thor")
                 .type(BOOK)
-                .numberChapters(69)
+                .totalChapters(69)
                 .build();
 
         service.addReadingItem(toSaveReadingItem);
@@ -66,7 +65,7 @@ class ReadingItemServiceTest {
         assertThat(savedReadingItemEntity.getTitle()).isEqualTo(toSaveReadingItem.getTitle());
         assertThat(savedReadingItemEntity.getType()).isEqualTo(toSaveReadingItem.getType());
         assertThat(savedReadingItemEntity.getAuthor()).isEqualTo(toSaveReadingItem.getAuthor());
-        assertThat(savedReadingItemEntity.getNumberChapters()).isEqualTo(toSaveReadingItem.getNumberChapters());
+        assertThat(savedReadingItemEntity.getTotalChapters()).isEqualTo(toSaveReadingItem.getTotalChapters());
         assertThat(savedReadingItemEntity.getCreatedAt()).isEqualTo(TestTimeConfig.NOW);
     }
 
@@ -74,13 +73,13 @@ class ReadingItemServiceTest {
     void addReadingItem_returnsSavedReadingItem() {
         var title = "New Book";
         var author = "A. U. Thor";
-        var numberChapters = 69;
+        var totalChapters = 69;
         ReadingItem toSaveReadingItem = ReadingItem.builder()
-                .title(title).author(author).type(BOOK).numberChapters(numberChapters)
+                .title(title).author(author).type(BOOK).totalChapters(totalChapters)
                 .build();
         ReadingItemEntity savedEntity = ReadingItemEntity.builder()
                 .id(42L)
-                .title(title).author(author).type(BOOK).numberChapters(numberChapters)
+                .title(title).author(author).type(BOOK).totalChapters(totalChapters)
                 .createdAt(TestTimeConfig.NOW)
                 .build();
         when(repository.save(any(ReadingItemEntity.class))).thenReturn(savedEntity);
@@ -114,7 +113,7 @@ class ReadingItemServiceTest {
         assertThat(updatedEntity.getTitle()).isEqualTo(updateMask.getTitle());
         assertThat(updatedEntity.getType()).isEqualTo(originalEntity.getType());
         assertThat(updatedEntity.getAuthor()).isEqualTo(originalEntity.getAuthor());
-        assertThat(updatedEntity.getNumberChapters()).isEqualTo(originalEntity.getNumberChapters());
+        assertThat(updatedEntity.getTotalChapters()).isEqualTo(originalEntity.getTotalChapters());
         assertThat(updatedEntity.getCreatedAt()).isEqualTo(originalEntity.getCreatedAt());
     }
 
@@ -157,6 +156,7 @@ class ReadingItemServiceTest {
     void deleteReadingItem_deletesReadingItem() {
         var id = 42L;
         ReadingItemEntity deletedEntity = testReadingItemEntity(ri -> ri.id(id));
+
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(deletedEntity));
 
         service.deleteReadingItem(id);
@@ -181,12 +181,13 @@ class ReadingItemServiceTest {
     void getReadingItem_findsReadingItemById() {
         var id = 42L;
         ReadingItemEntity entity = testReadingItemEntity(ri -> ri.id(id));
+
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(entity));
 
         service.getReadingItem(id);
 
         var captor = ArgumentCaptor.forClass(Long.class);
-        verify(repository, times(1)).findById(captor.capture());
+        verify(repository).findById(captor.capture());
         assertThat(captor.getValue()).isEqualTo(id);
     }
 
@@ -194,6 +195,7 @@ class ReadingItemServiceTest {
     void getReadingItem_returnsReadingItem() {
         var id = 42L;
         ReadingItemEntity entity = testReadingItemEntity(ri -> ri.id(id));
+
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(entity));
 
         var result = service.getReadingItem(id);
@@ -222,7 +224,7 @@ class ReadingItemServiceTest {
                 .title("an article")
                 .type(ARTICLE)
                 .author("an author")
-                .numberChapters(500);
+                .totalChapters(500);
         overrides.accept(builder);
         return builder.build();
     }
@@ -233,7 +235,7 @@ class ReadingItemServiceTest {
                 .title("an article")
                 .type(ARTICLE)
                 .author("an author")
-                .numberChapters(500);
+                .totalChapters(500);
         overrides.accept(builder);
         return builder.build();
     }
@@ -243,7 +245,7 @@ class ReadingItemServiceTest {
         assertThat(readingItem.getTitle()).isEqualTo(entity.getTitle());
         assertThat(readingItem.getType()).isEqualTo(entity.getType());
         assertThat(readingItem.getAuthor()).isEqualTo(entity.getAuthor());
-        assertThat(readingItem.getNumberChapters()).isEqualTo(entity.getNumberChapters());
+        assertThat(readingItem.getTotalChapters()).isEqualTo(entity.getTotalChapters());
         assertThat(readingItem.getCreatedAt()).isEqualTo(entity.getCreatedAt());
     }
 }

@@ -2,27 +2,34 @@ package com.necrock.readingtracker.user.persistence;
 
 import com.necrock.readingtracker.user.common.UserRole;
 import com.necrock.readingtracker.user.common.UserStatus;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 
 import java.time.Instant;
+import java.util.Objects;
 
 import static jakarta.persistence.GenerationType.AUTO;
 
 @Entity
-@Table(name = "users")
+@Table(
+        name = "users",
+        uniqueConstraints = @UniqueConstraint(
+                name = "user_unique_username",
+                columnNames = {"username"}))
 public class UserEntity {
+
+    public static final String UNIQUE_USERNAME =
+            "user_unique_username";
 
     @Id
     @GeneratedValue(strategy = AUTO)
     private Long id;
 
-    @Column(unique = true)
     private String username;
 
     private String email;
@@ -92,52 +99,74 @@ public class UserEntity {
         return createdAt;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(getId(), that.getId())
+                && Objects.equals(getUsername(), that.getUsername())
+                && Objects.equals(getEmail(), that.getEmail())
+                && Objects.equals(getPasswordHash(), that.getPasswordHash())
+                && getRole() == that.getRole()
+                && getStatus() == that.getStatus()
+                && Objects.equals(getCreatedAt(), that.getCreatedAt());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                getId(),
+                getUsername(),
+                getEmail(),
+                getPasswordHash(),
+                getRole(),
+                getStatus(),
+                getCreatedAt());
+    }
+
     public static class Builder {
         private Long id;
-
         private String username;
-
         private String email;
-
         private String passwordHash;
-
         private UserRole role;
-
         private UserStatus status;
-
         private Instant createdAt;
 
-        public Builder setId(Long id) {
+        public Builder id(Long id) {
             this.id = id;
             return this;
         }
 
-        public Builder setUsername(String username) {
+        public Builder username(String username) {
             this.username = username;
             return this;
         }
 
-        public Builder setEmail(String email) {
+        public Builder email(String email) {
             this.email = email;
             return this;
         }
 
-        public Builder setPasswordHash(String passwordHash) {
+        public Builder passwordHash(String passwordHash) {
             this.passwordHash = passwordHash;
             return this;
         }
 
-        public Builder setRole(UserRole role) {
+        public Builder role(UserRole role) {
             this.role = role;
             return this;
         }
 
-        public Builder setStatus(UserStatus status) {
+        public Builder status(UserStatus status) {
             this.status = status;
             return this;
         }
 
-        public Builder setCreatedAt(Instant createdAt) {
+        public Builder createdAt(Instant createdAt) {
             this.createdAt = createdAt;
             return this;
         }

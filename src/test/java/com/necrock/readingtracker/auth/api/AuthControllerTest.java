@@ -58,11 +58,11 @@ class AuthControllerTest {
     void register_withExistingUsername_returns409Conflict() throws Exception {
         var username = "user_register_withExistingUsername_returns409Conflict";
         var userEntity = UserEntity.builder()
-                .setUsername(username)
-                .setPasswordHash(passwordEncoder.encode("somePassword"))
-                .setEmail("email")
-                .setRole(USER)
-                .setStatus(ACTIVE)
+                .username(username)
+                .passwordHash(passwordEncoder.encode("somePassword"))
+                .email("email")
+                .role(USER)
+                .status(ACTIVE)
                 .build();
         userRepository.save(userEntity);
         var request = new RegisterRequest(username, "email@provider.com", "someOtherPassword");
@@ -76,11 +76,11 @@ class AuthControllerTest {
         var username = "user_login_withValidCredentials_returns200Ok";
         var password = "somePassword";
         var userEntity = UserEntity.builder()
-                .setUsername(username)
-                .setPasswordHash(passwordEncoder.encode(password))
-                .setEmail("email")
-                .setRole(USER)
-                .setStatus(ACTIVE)
+                .username(username)
+                .passwordHash(passwordEncoder.encode(password))
+                .email("email")
+                .role(USER)
+                .status(ACTIVE)
                 .build();
         userRepository.save(userEntity);
         var login = new LoginRequest(username, password);
@@ -94,11 +94,11 @@ class AuthControllerTest {
         var username = "user_login_withValidCredentials_returnsJwtToken";
         var password = "somePassword";
         var userEntity = UserEntity.builder()
-                .setUsername(username)
-                .setPasswordHash(passwordEncoder.encode(password))
-                .setEmail("email")
-                .setRole(USER)
-                .setStatus(ACTIVE)
+                .username(username)
+                .passwordHash(passwordEncoder.encode(password))
+                .email("email")
+                .role(USER)
+                .status(ACTIVE)
                 .build();
         userRepository.save(userEntity);
         var login = new LoginRequest(username, password);
@@ -114,11 +114,11 @@ class AuthControllerTest {
         var username = "user_login_withWrongPassword_returns401Unauthorized";
         var password = "somePassword";
         var userEntity = UserEntity.builder()
-                .setUsername(username)
-                .setPasswordHash(passwordEncoder.encode(password))
-                .setEmail("email")
-                .setRole(USER)
-                .setStatus(ACTIVE)
+                .username(username)
+                .passwordHash(passwordEncoder.encode(password))
+                .email("email")
+                .role(USER)
+                .status(ACTIVE)
                 .build();
         userRepository.save(userEntity);
         var login = new LoginRequest(username, "wrongPassword");

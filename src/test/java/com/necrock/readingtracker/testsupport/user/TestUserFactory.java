@@ -42,25 +42,25 @@ public class TestUserFactory {
 
     private UserEntity createNewUser(String username, UserRole role, UserStatus status) {
         UserEntity user = UserEntity.builder()
-                .setUsername(username)
-                .setPasswordHash(passwordEncoder.encode("testPass123"))
-                .setEmail(username + "@test.com")
-                .setRole(role)
-                .setStatus(status)
-                .setCreatedAt(Instant.now(clock))
+                .username(username)
+                .passwordHash(passwordEncoder.encode("testPass123"))
+                .email(username + "@test.com")
+                .role(role)
+                .status(status)
+                .createdAt(Instant.now(clock))
                 .build();
         return userRepository.save(user);
     }
 
     private UserEntity overrideExistingUser(UserEntity existingUser, UserRole role, UserStatus status) {
         UserEntity user = UserEntity.builder()
-                .setId(existingUser.getId())
-                .setUsername(existingUser.getUsername())
-                .setPasswordHash(existingUser.getPasswordHash())
-                .setEmail(existingUser.getEmail())
-                .setRole(role)
-                .setStatus(status)
-                .setCreatedAt(existingUser.getCreatedAt())
+                .id(existingUser.getId())
+                .username(existingUser.getUsername())
+                .passwordHash(existingUser.getPasswordHash())
+                .email(existingUser.getEmail())
+                .role(role)
+                .status(status)
+                .createdAt(existingUser.getCreatedAt())
                 .build();
         return userRepository.save(user);
     }

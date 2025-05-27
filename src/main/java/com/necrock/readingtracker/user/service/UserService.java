@@ -2,11 +2,10 @@ package com.necrock.readingtracker.user.service;
 
 import com.necrock.readingtracker.exception.NotFoundException;
 import com.necrock.readingtracker.exception.AlreadyExistsException;
-import com.necrock.readingtracker.user.persistence.UserRepository;
+import com.necrock.readingtracker.user.persistence.SafeUserRepository;
 import com.necrock.readingtracker.user.common.UserRole;
 import com.necrock.readingtracker.user.common.UserStatus;
 import com.necrock.readingtracker.user.service.model.User;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
@@ -15,22 +14,26 @@ import java.time.Instant;
 @Service
 public class UserService {
 
-    private final UserRepository repository;
+    private final SafeUserRepository repository;
     private final UserEntityMapper mapper;
     private final Clock clock;
 
-    public UserService(UserRepository repository, UserEntityMapper mapper, Clock clock) {
+    public UserService(SafeUserRepository repository, UserEntityMapper mapper, Clock clock) {
         this.repository = repository;
         this.mapper = mapper;
         this.clock = clock;
     }
 
     public User addUser(User user) {
+        validateAddPreconditions(user);
         var enrichedUser =
                 user.toBuilder().status(UserStatus.ACTIVE).role(UserRole.USER).createdAt(Instant.now(clock)).build();
-        try {
-            return saveUser(enrichedUser);
-        } catch (DataIntegrityViolationException e) {
+        return saveUser(enrichedUser);
+    }
+
+    private void validateAddPreconditions(User user) {
+        // Check if no other user with username exists
+        if (repository.findByUsername(user.getUsername()).isPresent()) {
             throw new AlreadyExistsException(
                     String.format("User with username '%s' already exists", user.getUsername()));
         }

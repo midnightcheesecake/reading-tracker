@@ -1,21 +1,25 @@
 package com.necrock.readingtracker.readingitem.api.dto;
 
 import com.necrock.readingtracker.readingitem.common.ReadingItemType;
-import jakarta.validation.constraints.NotBlank;
 
 public class ReadingItemDetailsDto {
-    private final Long id;
-    private final String title;
-    private final ReadingItemType type;
-    private final String author;
-    private final Integer numberChapters;
 
-    private ReadingItemDetailsDto(Long id, String title, ReadingItemType type, String author, Integer numberChapters) {
+    private final Long id;
+
+    private final String title;
+
+    private final ReadingItemType type;
+
+    private final String author;
+
+    private final Integer totalChapters;
+
+    private ReadingItemDetailsDto(Long id, String title, ReadingItemType type, String author, Integer totalChapters) {
         this.id = id;
         this.title = title;
         this.type = type;
         this.author = author;
-        this.numberChapters = numberChapters;
+        this.totalChapters = totalChapters;
     }
 
     public static Builder builder() {
@@ -38,8 +42,8 @@ public class ReadingItemDetailsDto {
         return author;
     }
 
-    public Integer getNumberChapters() {
-        return numberChapters;
+    public Integer getTotalChapters() {
+        return totalChapters;
     }
 
     public static class Builder {
@@ -47,7 +51,7 @@ public class ReadingItemDetailsDto {
         private String title;
         private ReadingItemType type;
         private String author;
-        private Integer numberChapters;
+        private Integer totalChapters;
 
         private Builder() {}
 
@@ -71,13 +75,13 @@ public class ReadingItemDetailsDto {
             return this;
         }
 
-        public Builder numberChapters(Integer numberChapters) {
-            this.numberChapters = numberChapters;
+        public Builder totalChapters(Integer totalChapters) {
+            this.totalChapters = totalChapters;
             return this;
         }
 
         public ReadingItemDetailsDto build() {
-            return new ReadingItemDetailsDto(id, title, type, author, numberChapters);
+            return new ReadingItemDetailsDto(id, title, type, author, totalChapters);
         }
     }
 }

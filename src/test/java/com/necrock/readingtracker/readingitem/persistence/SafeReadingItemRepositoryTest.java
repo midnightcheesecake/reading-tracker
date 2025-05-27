@@ -5,6 +5,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -12,14 +13,17 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
 @DataJpaTest
-class ReadingItemRepositoryTest {
+@Import(SafeReadingItemRepository.class)
+class SafeReadingItemRepositoryTest {
 
     @Autowired
-    private ReadingItemRepository repository;
+    private SafeReadingItemRepository repository;
+
+    @Autowired ReadingItemRepository unsafeRepository;
 
     @BeforeEach
     void setUp() {
-        repository.deleteAll();
+        unsafeRepository.deleteAll();
     }
 
     @Test
@@ -39,7 +43,7 @@ class ReadingItemRepositoryTest {
         var type = ReadingItemType.BOOK;
         var numChapters = 6;
         ReadingItemEntity readingItem =
-                ReadingItemEntity.builder().title(title).author(author).type(type).numberChapters(numChapters).build();
+                ReadingItemEntity.builder().title(title).author(author).type(type).totalChapters(numChapters).build();
 
         var savedItem = repository.save(readingItem);
 
@@ -47,16 +51,16 @@ class ReadingItemRepositoryTest {
         assertThat(savedItem.getTitle()).isEqualTo(title);
         assertThat(savedItem.getAuthor()).isEqualTo(author);
         assertThat(savedItem.getType()).isEqualTo(type);
-        assertThat(savedItem.getNumberChapters()).isEqualTo(numChapters);
+        assertThat(savedItem.getTotalChapters()).isEqualTo(numChapters);
     }
 
     @Test
     void save_increasesCount() {
-        long initialCount = repository.count();
+        long initialCount = unsafeRepository.count();
 
         repository.save(ReadingItemEntity.builder().title("title").build());
 
-        long finalCount = repository.count();
+        long finalCount = unsafeRepository.count();
         assertThat(finalCount).isEqualTo(initialCount + 1);
     }
 
@@ -75,7 +79,7 @@ class ReadingItemRepositoryTest {
         var type = ReadingItemType.BOOK;
         var numChapters = 6;
         ReadingItemEntity readingItem =
-                ReadingItemEntity.builder().title(title).author(author).type(type).numberChapters(numChapters).build();
+                ReadingItemEntity.builder().title(title).author(author).type(type).totalChapters(numChapters).build();
 
         var savedItem = repository.save(readingItem);
         var foundItem = repository.findById(savedItem.getId()).orElse(null);
@@ -84,6 +88,6 @@ class ReadingItemRepositoryTest {
         assertThat(foundItem.getTitle()).isEqualTo(title);
         assertThat(foundItem.getAuthor()).isEqualTo(author);
         assertThat(foundItem.getType()).isEqualTo(type);
-        assertThat(foundItem.getNumberChapters()).isEqualTo(numChapters);
+        assertThat(foundItem.getTotalChapters()).isEqualTo(numChapters);
     }
 }

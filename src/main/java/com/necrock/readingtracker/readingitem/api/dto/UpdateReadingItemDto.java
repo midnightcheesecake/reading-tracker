@@ -11,14 +11,14 @@ public class UpdateReadingItemDto {
 
     private final String author;
 
-    @PositiveOrZero(message = "Number of chapters can not be negative")
-    private final Integer numberChapters;
+    @PositiveOrZero(message = "Total number of chapters can not be negative")
+    private final Integer totalChapters;
 
-    private UpdateReadingItemDto(String title, ReadingItemType type, String author, Integer numberChapters) {
+    private UpdateReadingItemDto(String title, ReadingItemType type, String author, Integer totalChapters) {
         this.title = title;
         this.type = type;
         this.author = author;
-        this.numberChapters = numberChapters;
+        this.totalChapters = totalChapters;
     }
 
     public static Builder builder() {
@@ -37,19 +37,15 @@ public class UpdateReadingItemDto {
         return author;
     }
 
-    public Integer getNumberChapters() {
-        return numberChapters;
+    public Integer getTotalChapters() {
+        return totalChapters;
     }
 
     public static class Builder {
-
         private String title;
-
         private ReadingItemType type;
-
         private String author;
-
-        private Integer numberChapters;
+        private Integer totalChapters;
 
         private Builder() {}
 
@@ -68,13 +64,13 @@ public class UpdateReadingItemDto {
             return this;
         }
 
-        public Builder numberChapters(Integer numberChapters) {
-            this.numberChapters = numberChapters;
+        public Builder totalChapters(Integer totalChapters) {
+            this.totalChapters = totalChapters;
             return this;
         }
 
         public UpdateReadingItemDto build() {
-            return new UpdateReadingItemDto(title, type, author, numberChapters);
+            return new UpdateReadingItemDto(title, type, author, totalChapters);
         }
     }
 }

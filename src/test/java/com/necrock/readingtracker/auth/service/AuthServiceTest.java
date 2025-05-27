@@ -48,13 +48,13 @@ class AuthServiceTest {
                 new UserRegistration("username", "password", "email@provider.com");
 
         when(userRepository.save(any(UserEntity.class))).thenReturn(UserEntity.builder()
-                .setId(42L)
-                .setUsername(registration.username())
-                .setPasswordHash(passwordEncoder.encode(registration.password()))
-                .setEmail(registration.email())
-                .setRole(USER)
-                .setStatus(ACTIVE)
-                .setCreatedAt(TestTimeConfig.NOW)
+                .id(42L)
+                .username(registration.username())
+                .passwordHash(passwordEncoder.encode(registration.password()))
+                .email(registration.email())
+                .role(USER)
+                .status(ACTIVE)
+                .createdAt(TestTimeConfig.NOW)
                 .build());
 
         service.register(registration);
@@ -79,13 +79,13 @@ class AuthServiceTest {
         UserRegistration registration =
                 new UserRegistration(username, password, email);
         UserEntity savedUserEntity = UserEntity.builder()
-                .setId(42L)
-                .setUsername(username)
-                .setPasswordHash(passwordEncoder.encode(password))
-                .setEmail(email)
-                .setRole(USER)
-                .setStatus(ACTIVE)
-                .setCreatedAt(TestTimeConfig.NOW)
+                .id(42L)
+                .username(username)
+                .passwordHash(passwordEncoder.encode(password))
+                .email(email)
+                .role(USER)
+                .status(ACTIVE)
+                .createdAt(TestTimeConfig.NOW)
                 .build();
 
         when(userRepository.save(any(UserEntity.class))).thenReturn(savedUserEntity);
@@ -102,7 +102,8 @@ class AuthServiceTest {
         UserRegistration registration =
                 new UserRegistration(username, "password", "email@provider.com");
 
-        when(userRepository.save(any(UserEntity.class))).thenThrow(DataIntegrityViolationException.class);
+        when(userRepository.save(any(UserEntity.class)))
+                .thenThrow(new DataIntegrityViolationException(UserEntity.UNIQUE_USERNAME));
 
         assertThatThrownBy(() -> service.register(registration))
                 .isInstanceOf(AlreadyExistsException.class)
@@ -116,8 +117,8 @@ class AuthServiceTest {
         var login = new UserLogin(username, password);
         var userEntity =
                 testUserEntity(u -> u
-                        .setUsername(username)
-                        .setPasswordHash(passwordEncoder.encode(password)));
+                        .username(username)
+                        .passwordHash(passwordEncoder.encode(password)));
 
         when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(userEntity));
 
@@ -135,8 +136,8 @@ class AuthServiceTest {
         var login = new UserLogin(username, password);
         var userEntity =
                 testUserEntity(u -> u
-                        .setUsername(username)
-                        .setPasswordHash(passwordEncoder.encode(password)));
+                        .username(username)
+                        .passwordHash(passwordEncoder.encode(password)));
 
         when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(userEntity));
 
@@ -152,8 +153,8 @@ class AuthServiceTest {
         var login = new UserLogin(username, "wrongPassword");
         var userEntity =
                 testUserEntity(u -> u
-                        .setUsername(username)
-                        .setPasswordHash(passwordEncoder.encode("correctPassword")));
+                        .username(username)
+                        .passwordHash(passwordEncoder.encode("correctPassword")));
 
         when(userRepository.findByUsername(any(String.class))).thenReturn(Optional.of(userEntity));
 
@@ -174,12 +175,12 @@ class AuthServiceTest {
 
     private static UserEntity testUserEntity(Consumer<UserEntity.Builder> overrides) {
         var builder = UserEntity.builder()
-                .setId(666L)
-                .setUsername("username")
-                .setEmail("email@provider.com")
-                .setPasswordHash("#hash")
-                .setStatus(ACTIVE)
-                .setRole(USER);
+                .id(666L)
+                .username("username")
+                .email("email@provider.com")
+                .passwordHash("#hash")
+                .status(ACTIVE)
+                .role(USER);
         overrides.accept(builder);
         return builder.build();
     }

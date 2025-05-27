@@ -4,6 +4,7 @@ import com.necrock.readingtracker.user.common.UserRole;
 import com.necrock.readingtracker.user.common.UserStatus;
 
 import java.time.Instant;
+import java.util.Objects;
 
 public class User {
     private final Long id;
@@ -73,6 +74,34 @@ public class User {
                 .createdAt(createdAt);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        User user = (User) o;
+        return Objects.equals(getId(), user.getId())
+                && Objects.equals(getUsername(), user.getUsername())
+                && Objects.equals(getEmail(), user.getEmail())
+                && Objects.equals(getPasswordHash(), user.getPasswordHash())
+                && getRole() == user.getRole()
+                && getStatus() == user.getStatus()
+                && Objects.equals(getCreatedAt(), user.getCreatedAt());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                getId(),
+                getUsername(),
+                getEmail(),
+                getPasswordHash(),
+                getRole(),
+                getStatus(),
+                getCreatedAt());
+    }
+
     public static class Builder {
         private Long id;
         private String username;
@@ -81,6 +110,8 @@ public class User {
         private UserRole role;
         private UserStatus status;
         private Instant createdAt;
+
+        public Builder() {}
 
         public Builder id(Long id) {
             this.id = id;

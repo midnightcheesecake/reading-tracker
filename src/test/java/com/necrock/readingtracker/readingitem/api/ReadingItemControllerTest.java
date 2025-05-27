@@ -30,7 +30,7 @@ class ReadingItemControllerTest {
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
 
         testClient.addReadingItem(createReadingItem)
@@ -43,7 +43,7 @@ class ReadingItemControllerTest {
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
 
         ResultActions result = testClient.addReadingItem(createReadingItem);
@@ -53,7 +53,7 @@ class ReadingItemControllerTest {
         assertThat(responseDto.getTitle()).isEqualTo(createReadingItem.getTitle());
         assertThat(responseDto.getAuthor()).isEqualTo(createReadingItem.getAuthor());
         assertThat(responseDto.getType()).isEqualTo(createReadingItem.getType());
-        assertThat(responseDto.getNumberChapters()).isEqualTo(createReadingItem.getNumberChapters());
+        assertThat(responseDto.getTotalChapters()).isEqualTo(createReadingItem.getTotalChapters());
     }
 
     @Test
@@ -61,7 +61,7 @@ class ReadingItemControllerTest {
         var createReadingItem = CreateReadingItemDto.builder()
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
 
         testClient.addReadingItem(createReadingItem)
@@ -75,7 +75,7 @@ class ReadingItemControllerTest {
         var createReadingItem = CreateReadingItemDto.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
 
         testClient.addReadingItem(createReadingItem)
@@ -89,7 +89,7 @@ class ReadingItemControllerTest {
         var createReadingItem = CreateReadingItemDto.builder()
                 .title("Clean Architecture")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
 
         testClient.addReadingItem(createReadingItem)
@@ -99,18 +99,18 @@ class ReadingItemControllerTest {
     }
 
     @Test
-    void createReadingItem_withNegativeNumberChapters_returns400BadRequest() throws Exception {
+    void createReadingItem_withNegativeTotalChapters_returns400BadRequest() throws Exception {
         var createReadingItem = CreateReadingItemDto.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(-30)
+                .totalChapters(-30)
                 .build();
 
         testClient.addReadingItem(createReadingItem)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.type").value("VALIDATION_ERROR"))
-                .andExpect(jsonPath("$.details.numberChapters").value("Number of chapters can not be negative"));
+                .andExpect(jsonPath("$.details.totalChapters").value("Total number of chapters can not be negative"));
     }
 
     @Test
@@ -119,10 +119,10 @@ class ReadingItemControllerTest {
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
         var updateReadingItem = UpdateReadingItemDto.builder()
-                .numberChapters(40)
+                .totalChapters(40)
                 .build();
 
         var createResult = testClient.addReadingItem(createReadingItem);
@@ -139,10 +139,10 @@ class ReadingItemControllerTest {
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
         var updateReadingItem = UpdateReadingItemDto.builder()
-                .numberChapters(40)
+                .totalChapters(40)
                 .build();
 
         var createResult = testClient.addReadingItem(createReadingItem);
@@ -156,7 +156,7 @@ class ReadingItemControllerTest {
         assertThat(responseDto.getTitle()).isEqualTo(createReadingItem.getTitle());
         assertThat(responseDto.getAuthor()).isEqualTo(createReadingItem.getAuthor());
         assertThat(responseDto.getType()).isEqualTo(createReadingItem.getType());
-        assertThat(responseDto.getNumberChapters()).isEqualTo(updateReadingItem.getNumberChapters());
+        assertThat(responseDto.getTotalChapters()).isEqualTo(updateReadingItem.getTotalChapters());
     }
 
     @Test
@@ -165,7 +165,7 @@ class ReadingItemControllerTest {
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
 
         testClient.updateReadingItem(98765, updateReadingItem)
@@ -175,15 +175,15 @@ class ReadingItemControllerTest {
     }
 
     @Test
-    void updateReadingItem_withNegativeNumberChapters_returns400BadRequest() throws Exception {
+    void updateReadingItem_withNegativeTotalChapters_returns400BadRequest() throws Exception {
         var createReadingItem = CreateReadingItemDto.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
         var updateReadingItem = UpdateReadingItemDto.builder()
-                .numberChapters(-30)
+                .totalChapters(-30)
                 .build();
 
         var createResult = testClient.addReadingItem(createReadingItem);
@@ -193,7 +193,7 @@ class ReadingItemControllerTest {
         testClient.updateReadingItem(id, updateReadingItem)
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.type").value("VALIDATION_ERROR"))
-                .andExpect(jsonPath("$.details.numberChapters").value("Number of chapters can not be negative"));
+                .andExpect(jsonPath("$.details.totalChapters").value("Total number of chapters can not be negative"));
     }
 
     @Test
@@ -202,7 +202,7 @@ class ReadingItemControllerTest {
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
 
         var createResult = testClient.addReadingItem(createReadingItem);
@@ -227,7 +227,7 @@ class ReadingItemControllerTest {
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
 
         var createResult = testClient.addReadingItem(createReadingItem);
@@ -244,7 +244,7 @@ class ReadingItemControllerTest {
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
 
         var createResult = testClient.addReadingItem(createReadingItem);
@@ -258,7 +258,7 @@ class ReadingItemControllerTest {
         assertThat(responseDto.getTitle()).isEqualTo(createReadingItem.getTitle());
         assertThat(responseDto.getAuthor()).isEqualTo(createReadingItem.getAuthor());
         assertThat(responseDto.getType()).isEqualTo(createReadingItem.getType());
-        assertThat(responseDto.getNumberChapters()).isEqualTo(createReadingItem.getNumberChapters());
+        assertThat(responseDto.getTotalChapters()).isEqualTo(createReadingItem.getTotalChapters());
     }
 
     @Test
@@ -275,7 +275,7 @@ class ReadingItemControllerTest {
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
-                .numberChapters(30)
+                .totalChapters(30)
                 .build();
 
         var createResult = testClient.addReadingItem(createReadingItem);

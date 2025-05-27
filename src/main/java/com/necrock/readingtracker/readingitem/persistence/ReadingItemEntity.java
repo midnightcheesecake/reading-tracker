@@ -9,6 +9,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
+import java.util.Objects;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
 
@@ -22,11 +23,12 @@ public class ReadingItemEntity {
 
     private String title;
 
+    @Enumerated(EnumType.STRING)
     private ReadingItemType type;
 
     private String author;
 
-    private Integer numberChapters;
+    private Integer totalChapters;
 
     private Instant createdAt;
 
@@ -34,13 +36,13 @@ public class ReadingItemEntity {
                               String title,
                               ReadingItemType type,
                               String author,
-                              Integer numberChapters,
+                              Integer totalChapters,
                               Instant createdAt) {
         this.id = id;
         this.title = title;
         this.type = type;
         this.author = author;
-        this.numberChapters = numberChapters;
+        this.totalChapters = totalChapters;
         this.createdAt = createdAt;
     }
 
@@ -63,7 +65,6 @@ public class ReadingItemEntity {
         return title;
     }
 
-    @Enumerated(EnumType.STRING)
     public ReadingItemType getType() {
         return type;
     }
@@ -72,25 +73,46 @@ public class ReadingItemEntity {
         return author;
     }
 
-    public Integer getNumberChapters() {
-        return numberChapters;
+    public Integer getTotalChapters() {
+        return totalChapters;
     }
 
     public Instant getCreatedAt() {
         return createdAt;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+
+        ReadingItemEntity that = (ReadingItemEntity) o;
+        return Objects.equals(getId(), that.getId())
+                && Objects.equals(getTitle(), that.getTitle())
+                && getType() == that.getType()
+                && Objects.equals(getAuthor(), that.getAuthor())
+                && Objects.equals(getTotalChapters(), that.getTotalChapters())
+                && Objects.equals(getCreatedAt(), that.getCreatedAt());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(
+                getId(),
+                getTitle(),
+                getType(),
+                getAuthor(),
+                getTotalChapters(),
+                getCreatedAt());
+    }
+
     public static class Builder {
         private Long id;
-
         private String title;
-
         private ReadingItemType type;
-
         private String author;
-
-        private Integer numberChapters;
-
+        private Integer totalChapters;
         private Instant createdAt;
 
         public Builder id(Long id) {
@@ -113,8 +135,8 @@ public class ReadingItemEntity {
             return this;
         }
 
-        public Builder numberChapters(Integer numberChapters) {
-            this.numberChapters = numberChapters;
+        public Builder totalChapters(Integer totalChapters) {
+            this.totalChapters = totalChapters;
             return this;
         }
 
@@ -124,7 +146,7 @@ public class ReadingItemEntity {
         }
 
         public ReadingItemEntity build() {
-            return new ReadingItemEntity(id, title, type, author, numberChapters, createdAt);
+            return new ReadingItemEntity(id, title, type, author, totalChapters, createdAt);
         }
     }
 }

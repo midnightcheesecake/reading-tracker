@@ -1,7 +1,9 @@
 package com.necrock.readingtracker.user.api.self.dto;
 
 public class SelfUserDetailsDto {
+
     private final String username;
+
     private final String email;
 
     private SelfUserDetailsDto(String username, String email) {

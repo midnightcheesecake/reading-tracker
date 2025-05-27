@@ -4,9 +4,13 @@ import com.necrock.readingtracker.user.common.UserRole;
 import com.necrock.readingtracker.user.common.UserStatus;
 
 public class AdminUserDetailsDto {
+
     private final Long id;
+
     private final String username;
+
     private final UserRole role;
+
     private final UserStatus status;
 
     private AdminUserDetailsDto(Long id, String username, UserRole role, UserStatus status) {

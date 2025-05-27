@@ -69,13 +69,13 @@ class UserServiceTest {
                 .username(username).email(email).passwordHash(passwordHash)
                 .build();
         UserEntity savedUserEntity = UserEntity.builder()
-                .setId(42L)
-                .setUsername(username)
-                .setEmail(email)
-                .setPasswordHash(passwordHash)
-                .setStatus(ACTIVE)
-                .setRole(USER)
-                .setCreatedAt(TestTimeConfig.NOW)
+                .id(42L)
+                .username(username)
+                .email(email)
+                .passwordHash(passwordHash)
+                .status(ACTIVE)
+                .role(USER)
+                .createdAt(TestTimeConfig.NOW)
                 .build();
 
         when(repository.save(any(UserEntity.class))).thenReturn(savedUserEntity);
@@ -89,7 +89,8 @@ class UserServiceTest {
     void addUser_withExistingUsername_throwsAlreadyExistsException() {
         var username = "username";
 
-        when(repository.save(any(UserEntity.class))).thenThrow(DataIntegrityViolationException.class);
+        when(repository.save(any(UserEntity.class)))
+                .thenThrow(new DataIntegrityViolationException(UserEntity.UNIQUE_USERNAME));
 
         assertThatThrownBy(() -> service.addUser(testUser(u -> u.username(username))))
                 .isInstanceOf(AlreadyExistsException.class)
@@ -101,8 +102,8 @@ class UserServiceTest {
         var id = 42L;
         UserEntity originalUserEntity =
                 testUserEntity(u -> u
-                        .setId(id)
-                        .setEmail("old.email@provider.com"));
+                        .id(id)
+                        .email("old.email@provider.com"));
         User updateMask =
                 User.builder()
                         .email("new.email@provider.net")
@@ -128,13 +129,13 @@ class UserServiceTest {
         var id = 42L;
         UserEntity originalUserEntity =
                 testUserEntity(u -> u
-                        .setId(id)
-                        .setEmail("old.email@provider.com"));
+                        .id(id)
+                        .email("old.email@provider.com"));
         User updateMask = User.builder().email("new.email@provider.net").build();
         UserEntity updatedUserEntity =
                 testUserEntity(u -> u
-                        .setId(id)
-                        .setEmail("new.email@provider.net"));
+                        .id(id)
+                        .email("new.email@provider.net"));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
         when(repository.save(any(UserEntity.class))).thenReturn(updatedUserEntity);
@@ -158,7 +159,7 @@ class UserServiceTest {
     @Test
     void getUser_withId_findsUserById() {
         var id = 42L;
-        UserEntity userEntity = testUserEntity(u -> u.setId(id));
+        UserEntity userEntity = testUserEntity(u -> u.id(id));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(userEntity));
 
@@ -172,7 +173,7 @@ class UserServiceTest {
     @Test
     void getUser_withId_returnsUser() {
         var id = 42L;
-        UserEntity userEntity = testUserEntity(u -> u.setId(id));
+        UserEntity userEntity = testUserEntity(u -> u.id(id));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(userEntity));
 
@@ -193,9 +194,9 @@ class UserServiceTest {
     }
 
     @Test
-    void getUser_usingUsername_findsUser() {
+    void getUser_withUsername_findsUser() {
         var username = "user";
-        UserEntity userEntity = testUserEntity(u -> u.setUsername(username));
+        UserEntity userEntity = testUserEntity(u -> u.username(username));
 
         when(repository.findByUsername(any(String.class))).thenReturn(Optional.of(userEntity));
 
@@ -207,9 +208,9 @@ class UserServiceTest {
     }
 
     @Test
-    void getUser_usingUsername_returnsUser() {
+    void getUser_withUsername_returnsUser() {
         var username = "user";
-        UserEntity userEntity = testUserEntity(u -> u.setUsername(username));
+        UserEntity userEntity = testUserEntity(u -> u.username(username));
 
         when(repository.findByUsername(any(String.class))).thenReturn(Optional.of(userEntity));
 
@@ -235,8 +236,8 @@ class UserServiceTest {
         var newPasswordHash = "#newPasswordHash";
         UserEntity originalUserEntity =
                 testUserEntity(u -> u
-                        .setId(id)
-                        .setStatus(DELETED));
+                        .id(id)
+                        .status(DELETED));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
 
@@ -269,8 +270,8 @@ class UserServiceTest {
         var id = 42L;
         UserEntity originalUserEntity =
                 testUserEntity(u -> u
-                        .setId(id)
-                        .setStatus(DELETED));
+                        .id(id)
+                        .status(DELETED));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
 
@@ -303,8 +304,8 @@ class UserServiceTest {
         var id = 42L;
         UserEntity originalUserEntity =
                 testUserEntity(u -> u
-                        .setId(id)
-                        .setRole(ADMIN));
+                        .id(id)
+                        .role(ADMIN));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(originalUserEntity));
 
@@ -337,8 +338,8 @@ class UserServiceTest {
         var id = 42L;
         UserEntity userEntity =
                 testUserEntity(u -> u
-                        .setId(id)
-                        .setRole(ADMIN));
+                        .id(id)
+                        .role(ADMIN));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(userEntity));
 
@@ -352,8 +353,8 @@ class UserServiceTest {
         var id = 42L;
         UserEntity userEntity =
                 testUserEntity(u -> u
-                        .setId(id)
-                        .setRole(USER));
+                        .id(id)
+                        .role(USER));
 
         when(repository.findById(any(Long.class))).thenReturn(Optional.of(userEntity));
 
@@ -391,12 +392,12 @@ class UserServiceTest {
 
     private static UserEntity testUserEntity(Consumer<UserEntity.Builder> overrides) {
         var builder = UserEntity.builder()
-                .setId(666L)
-                .setUsername("username")
-                .setEmail("email@provider.com")
-                .setPasswordHash("#hash")
-                .setStatus(ACTIVE)
-                .setRole(USER);
+                .id(666L)
+                .username("username")
+                .email("email@provider.com")
+                .passwordHash("#hash")
+                .status(ACTIVE)
+                .role(USER);
         overrides.accept(builder);
         return builder.build();
     }
