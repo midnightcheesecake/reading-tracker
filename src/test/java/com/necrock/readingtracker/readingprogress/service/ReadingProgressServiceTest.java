@@ -326,7 +326,7 @@ class ReadingProgressServiceTest {
     }
 
     @Test
-    void deleteReadingProgress_deletesReadingItem() {
+    void deleteReadingProgress_deletesReadingProgress() {
         var id = 42L;
         ReadingProgressEntity deletedEntity = testReadingProgressEntityBuilder().build();
 

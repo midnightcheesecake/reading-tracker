@@ -37,4 +37,14 @@ public class SafeReadingProgressRepository extends SafeRepository<ReadingProgres
     public List<ReadingProgressEntity> findAllByUserId(Long id) {
         return repository.findAllByUserId(id);
     }
+
+    @Override
+    protected void onSave(ReadingProgressEntity progress) {
+        progress.getReadingItem().addProgress(progress);
+    }
+
+    @Override
+    protected void onDelete(ReadingProgressEntity progress) {
+        progress.getReadingItem().removeProgress(progress);
+    }
 }

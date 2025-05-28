@@ -26,7 +26,7 @@ public abstract class SafeRepository<E, K> {
 
     protected abstract ImmutableMap<String, Function<E, RuntimeException>> getUniqueConstraints();
 
-    public E saveAndFlush(E entity) {
+    public final E saveAndFlush(E entity) {
         if (!entityManager.isJoinedToTransaction()) {
             throw new IllegalStateException("EntityManager is not joined to a transaction" +
                     " - make sure to call this method withing a @Transactional environment");
@@ -34,12 +34,13 @@ public abstract class SafeRepository<E, K> {
         return doSaveAndHandleExceptions(repository::saveAndFlush, entity);
     }
 
-    public E save(E entity) {
+    public final E save(E entity) {
         return doSaveAndHandleExceptions(repository::save, entity);
     }
 
     private E doSaveAndHandleExceptions(Function<E, E> saveFunction, E entity) {
         try {
+            onSave(entity);
             return saveFunction.apply(entity);
         } catch (DataIntegrityViolationException | ConstraintViolationException ex) {
             for (var constraint : getUniqueConstraints().entrySet()) {
@@ -55,19 +56,24 @@ public abstract class SafeRepository<E, K> {
         }
     }
 
-    private boolean messageIndicatesConstraint(Throwable ex, String constraint) {
-        return ExceptionUtils.getRootCauseMessage(ex).toLowerCase().contains(constraint.toLowerCase());
+    protected void onSave(E entity) {}
+
+    public final void delete(E entity) {
+        repository.delete(entity);
+        onDelete(entity);
     }
 
-    public Optional<E> findById(K key) {
+    protected void onDelete(E entity) {}
+
+    public final Optional<E> findById(K key) {
         return repository.findById(key);
     }
 
-    public void delete(E entity) {
-        repository.delete(entity);
+    public final List<E> findAll() {
+        return repository.findAll();
     }
 
-    public List<E> findAll() {
-        return repository.findAll();
+    private static boolean messageIndicatesConstraint(Throwable ex, String constraint) {
+        return ExceptionUtils.getRootCauseMessage(ex).toLowerCase().contains(constraint.toLowerCase());
     }
 }

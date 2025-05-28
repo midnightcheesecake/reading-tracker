@@ -98,6 +98,6 @@ public class ReadingProgressService {
     public void deleteReadingProgress(Long id) {
         var progress = repository.findById(id)
                 .orElseThrow(() -> new NotFoundException(String.format("No reading progress with id %d", id)));
-        progress.getReadingItem().removeProgress(progress);
+        repository.delete(progress);
     }
 }
