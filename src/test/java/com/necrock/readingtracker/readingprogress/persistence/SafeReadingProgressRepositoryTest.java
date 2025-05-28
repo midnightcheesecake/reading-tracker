@@ -92,6 +92,20 @@ class SafeReadingProgressRepositoryTest {
     }
 
     @Test
+    void save_withNewProgress_addsProgressToReadingItem() {
+        ReadingProgressEntity readingProgress = ReadingProgressEntity.builder()
+                .user(createUser())
+                .readingItem(createReadingItem())
+                .lastReadChapter(10)
+                .build();
+
+        var savedProgress = repository.save(readingProgress);
+
+        assertThat(savedProgress).isNotNull();
+        assertThat(savedProgress.getId()).isNotNull();
+    }
+
+    @Test
     void save_withNewProgress_withExistingForeignKey_fails() {
         UserEntity user = createUser();
         ReadingItemEntity readingItem = createReadingItem();

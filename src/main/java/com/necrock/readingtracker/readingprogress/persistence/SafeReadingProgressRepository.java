@@ -3,6 +3,9 @@ package com.necrock.readingtracker.readingprogress.persistence;
 import com.google.common.collect.ImmutableMap;
 import com.necrock.readingtracker.common.SafeRepository;
 import com.necrock.readingtracker.exception.AlreadyExistsException;
+import com.necrock.readingtracker.exception.NotFoundException;
+import com.necrock.readingtracker.readingitem.persistence.ReadingItemEntity;
+import jakarta.persistence.EntityManager;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -12,10 +15,12 @@ import java.util.function.Function;
 @Component
 public class SafeReadingProgressRepository extends SafeRepository<ReadingProgressEntity, Long> {
     private final ReadingProgressRepository repository;
+    private final EntityManager entityManager;
 
-    public SafeReadingProgressRepository(ReadingProgressRepository repository) {
+    public SafeReadingProgressRepository(ReadingProgressRepository repository, EntityManager entityManager) {
         super(repository);
         this.repository = repository;
+        this.entityManager = entityManager;
     }
 
     @Override
@@ -40,11 +45,19 @@ public class SafeReadingProgressRepository extends SafeRepository<ReadingProgres
 
     @Override
     protected void onSave(ReadingProgressEntity progress) {
-        progress.getReadingItem().addProgress(progress);
+        getManagedReference(progress.getReadingItem()).addProgress(progress);
     }
 
     @Override
     protected void onDelete(ReadingProgressEntity progress) {
-        progress.getReadingItem().removeProgress(progress);
+        getManagedReference(progress.getReadingItem()).removeProgress(progress);
+    }
+
+    private ReadingItemEntity getManagedReference(ReadingItemEntity unmanaged) {
+        ReadingItemEntity managed = entityManager.find(ReadingItemEntity.class, unmanaged.getId());
+        if (managed == null) {
+            throw new NotFoundException(String.format("No reading item entity with id %d", unmanaged.getId()));
+        }
+        return managed;
     }
 }

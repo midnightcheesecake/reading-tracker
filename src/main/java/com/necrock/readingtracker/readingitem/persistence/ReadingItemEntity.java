@@ -8,12 +8,13 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.MapKey;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 import static jakarta.persistence.GenerationType.IDENTITY;
@@ -38,7 +39,8 @@ public class ReadingItemEntity {
     private Instant createdAt;
 
     @OneToMany(mappedBy = "readingItem", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ReadingProgressEntity> progressList = new ArrayList<>();
+    @MapKey(name = "id")
+    private Map<Long, ReadingProgressEntity> progressSet = new HashMap<>();
 
     private ReadingItemEntity(Long id,
                               String title,
@@ -90,11 +92,15 @@ public class ReadingItemEntity {
     }
 
     public void addProgress(ReadingProgressEntity progress) {
-        progressList.add(progress);
+        progressSet.put(progress.getId(), progress);
     }
 
     public void removeProgress(ReadingProgressEntity progress) {
-        progressList.remove(progress);
+        progressSet.remove(progress.getId());
+    }
+
+    public boolean containsProgress(ReadingProgressEntity progress) {
+        return progressSet.containsKey(progress.getId());
     }
 
     @Override

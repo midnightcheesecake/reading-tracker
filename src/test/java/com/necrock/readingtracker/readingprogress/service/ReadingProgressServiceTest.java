@@ -9,10 +9,10 @@ import com.necrock.readingtracker.readingitem.service.model.ReadingItem;
 import com.necrock.readingtracker.readingprogress.persistence.ReadingProgressEntity;
 import com.necrock.readingtracker.readingprogress.persistence.ReadingProgressRepository;
 import com.necrock.readingtracker.readingprogress.service.model.ReadingProgress;
-import com.necrock.readingtracker.testsupport.readingProgress.TestReadingProgressEntity;
 import com.necrock.readingtracker.user.persistence.UserEntity;
 import com.necrock.readingtracker.user.persistence.UserRepository;
 import com.necrock.readingtracker.user.service.model.User;
+import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +28,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -44,6 +45,8 @@ class ReadingProgressServiceTest {
     private UserRepository userRepository;
     @MockitoBean
     private ReadingItemRepository readingItemRepository;
+    @MockitoBean
+    private EntityManager entityManager;
 
     @Test
     void addReadingProgress_savesReadingProgress() {
@@ -59,7 +62,9 @@ class ReadingProgressServiceTest {
                 .build();
 
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(UserEntity.builder().build()));
-        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(ReadingItemEntity.builder().build()));
+        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
+        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(readingItemEntity));
+        when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
 
         service.addReadingProgress(toSaveProgress);
 
@@ -83,7 +88,9 @@ class ReadingProgressServiceTest {
                         .id(42L).userId(userId).readingItemId(readingItemId).build();
 
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(UserEntity.builder().build()));
-        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(ReadingItemEntity.builder().build()));
+        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
+        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(readingItemEntity));
+        when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
 
         when(repository.save(any(ReadingProgressEntity.class)))
                 .thenReturn(savedEntity);
@@ -98,7 +105,8 @@ class ReadingProgressServiceTest {
         var userId = 69L;
         var readingItemId = 1337L;
 
-        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(ReadingItemEntity.builder().build()));
+        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
+        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(readingItemEntity));
 
         assertThatThrownBy(() -> service.addReadingProgress(
                 testReadingProgressBuilder().userId(userId).readingItemId(readingItemId).build()))
@@ -125,7 +133,8 @@ class ReadingProgressServiceTest {
         var readingItemId = 1337L;
 
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(UserEntity.builder().build()));
-        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(ReadingItemEntity.builder().build()));
+        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
+        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(readingItemEntity));
 
         when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.of(testReadingProgressEntityBuilder().build()));
@@ -144,7 +153,9 @@ class ReadingProgressServiceTest {
         var readingItemId = 1337L;
 
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(UserEntity.builder().build()));
-        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(ReadingItemEntity.builder().build()));
+        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
+        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(readingItemEntity));
+        when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
         when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
 
         when(repository.save(any(ReadingProgressEntity.class)))
@@ -242,7 +253,8 @@ class ReadingProgressServiceTest {
 
         assertThatThrownBy(() -> service.getReadingProgress(user, readingItem))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("No reading progress for user " + user.getId() + " and reading item " + readingItem.getId());
+                .hasMessage(
+                        "No reading progress for user " + user.getId() + " and reading item " + readingItem.getId());
     }
 
     @Test
@@ -275,6 +287,8 @@ class ReadingProgressServiceTest {
 
         when(repository.findById(any(Long.class)))
                 .thenReturn(Optional.of(originalEntity));
+        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
+        when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
 
         service.updateReadingProgress(id, updateMask);
 
@@ -307,6 +321,8 @@ class ReadingProgressServiceTest {
                 .thenReturn(Optional.of(originalEntity));
         when(repository.save(any(ReadingProgressEntity.class)))
                 .thenReturn(updatedEntity);
+        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
+        when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
 
         var result = service.updateReadingProgress(id, updateMask);
 
@@ -332,6 +348,8 @@ class ReadingProgressServiceTest {
 
         when(repository.findById(any(Long.class)))
                 .thenReturn(Optional.of(deletedEntity));
+        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
+        when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
 
         service.deleteReadingProgress(id);
 
