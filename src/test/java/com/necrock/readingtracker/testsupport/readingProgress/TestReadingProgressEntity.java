@@ -30,7 +30,7 @@ public class TestReadingProgressEntity {
                 .status(ACTIVE)
                 .role(USER)
                 .createdAt(Instant.parse("2020-01-01T00:00:00Z"));
-        private final ReadingItemEntity.Builder readingItemBuilder = ReadingItemEntity.builder()
+        private ReadingItemEntity.Builder readingItemBuilder = ReadingItemEntity.builder()
                 .id(666L)
                 .title("an article")
                 .type(ARTICLE)
@@ -53,6 +53,11 @@ public class TestReadingProgressEntity {
 
         public Builder readingItemId(Long id) {
             readingItemBuilder.id(id);
+            return this;
+        }
+
+        public Builder readingItem(ReadingItemEntity readingItem) {
+            readingItemBuilder = readingItem.toBuilder();
             return this;
         }
 

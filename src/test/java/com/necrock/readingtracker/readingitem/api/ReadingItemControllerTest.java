@@ -1,8 +1,8 @@
 package com.necrock.readingtracker.readingitem.api;
 
-import com.necrock.readingtracker.readingitem.api.dto.CreateReadingItemDto;
+import com.necrock.readingtracker.readingitem.api.dto.CreateReadingItemRequest;
 import com.necrock.readingtracker.readingitem.api.dto.ReadingItemDetailsDto;
-import com.necrock.readingtracker.readingitem.api.dto.UpdateReadingItemDto;
+import com.necrock.readingtracker.readingitem.api.dto.UpdateReadingItemRequest;
 import com.necrock.readingtracker.testsupport.readingitem.ReadingItemTestClient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +26,7 @@ class ReadingItemControllerTest {
 
     @Test
     void createReadingItem_returns201Created() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
@@ -39,7 +39,7 @@ class ReadingItemControllerTest {
 
     @Test
     void createReadingItem_returnsNewReadingItem() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
@@ -58,7 +58,7 @@ class ReadingItemControllerTest {
 
     @Test
     void createReadingItem_withMissingTitle_returns400BadRequest() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .author("Robert C. Martin")
                 .type(BOOK)
                 .totalChapters(30)
@@ -72,7 +72,7 @@ class ReadingItemControllerTest {
 
     @Test
     void createReadingItem_withMissingType_returns400BadRequest() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .totalChapters(30)
@@ -86,7 +86,7 @@ class ReadingItemControllerTest {
 
     @Test
     void createReadingItem_withMissingAuthor_returns400BadRequest() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .type(BOOK)
                 .totalChapters(30)
@@ -100,7 +100,7 @@ class ReadingItemControllerTest {
 
     @Test
     void createReadingItem_withNegativeTotalChapters_returns400BadRequest() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
@@ -115,13 +115,13 @@ class ReadingItemControllerTest {
 
     @Test
     void updateReadingItem_returns200Ok() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
                 .totalChapters(30)
                 .build();
-        var updateReadingItem = UpdateReadingItemDto.builder()
+        var updateReadingItem = UpdateReadingItemRequest.builder()
                 .totalChapters(40)
                 .build();
 
@@ -135,13 +135,13 @@ class ReadingItemControllerTest {
 
     @Test
     void updateReadingItem_returnsUpdatedReadingItem() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
                 .totalChapters(30)
                 .build();
-        var updateReadingItem = UpdateReadingItemDto.builder()
+        var updateReadingItem = UpdateReadingItemRequest.builder()
                 .totalChapters(40)
                 .build();
 
@@ -161,7 +161,7 @@ class ReadingItemControllerTest {
 
     @Test
     void updateReadingItem_withUnknownId_returns404NotFound() throws Exception {
-        var updateReadingItem = UpdateReadingItemDto.builder()
+        var updateReadingItem = UpdateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
@@ -176,13 +176,13 @@ class ReadingItemControllerTest {
 
     @Test
     void updateReadingItem_withNegativeTotalChapters_returns400BadRequest() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
                 .totalChapters(30)
                 .build();
-        var updateReadingItem = UpdateReadingItemDto.builder()
+        var updateReadingItem = UpdateReadingItemRequest.builder()
                 .totalChapters(-30)
                 .build();
 
@@ -198,7 +198,7 @@ class ReadingItemControllerTest {
 
     @Test
     void deleteReadingItem_returns204NoContent() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
@@ -223,7 +223,7 @@ class ReadingItemControllerTest {
 
     @Test
     void getReadingItem_returns200Ok() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
@@ -240,7 +240,7 @@ class ReadingItemControllerTest {
 
     @Test
     void getReadingItem_returnsReadingItem() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)
@@ -271,7 +271,7 @@ class ReadingItemControllerTest {
 
     @Test
     void getReadingItem_withDeletedReadingItemId_returns404NotFound() throws Exception {
-        var createReadingItem = CreateReadingItemDto.builder()
+        var createReadingItem = CreateReadingItemRequest.builder()
                 .title("Clean Architecture")
                 .author("Robert C. Martin")
                 .type(BOOK)

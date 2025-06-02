@@ -1,8 +1,8 @@
 package com.necrock.readingtracker.readingitem.api;
 
-import com.necrock.readingtracker.readingitem.api.dto.CreateReadingItemDto;
+import com.necrock.readingtracker.readingitem.api.dto.CreateReadingItemRequest;
 import com.necrock.readingtracker.readingitem.api.dto.ReadingItemDetailsDto;
-import com.necrock.readingtracker.readingitem.api.dto.UpdateReadingItemDto;
+import com.necrock.readingtracker.readingitem.api.dto.UpdateReadingItemRequest;
 import com.necrock.readingtracker.readingitem.service.model.ReadingItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -14,9 +14,9 @@ public interface ReadingItemMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    ReadingItem toDomainModel(CreateReadingItemDto dto);
+    ReadingItem toDomainModel(CreateReadingItemRequest dto);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    ReadingItem toDomainModel(UpdateReadingItemDto dto);
+    ReadingItem toDomainModel(UpdateReadingItemRequest dto);
 }

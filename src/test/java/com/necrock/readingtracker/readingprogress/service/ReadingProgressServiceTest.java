@@ -50,79 +50,66 @@ class ReadingProgressServiceTest {
 
     @Test
     void addReadingProgress_savesReadingProgress() {
+        User user = User.builder()
+                .id(69L)
+                .username("user")
+                .email("user@email.com")
+                .build();
+        long readingItemId = 1337L;
+        ReadingItemEntity readingItemEntity = testReadingItem(readingItemId);
         ReadingProgress toSaveProgress = ReadingProgress.builder()
-                .user(User.builder()
-                        .id(69L)
-                        .username("user")
-                        .email("user@email.com"))
-                .readingItem(ReadingItem.builder()
-                        .id(1337L)
-                        .title("Reading Item"))
+                .readingItem(ReadingItem.builder().id(readingItemId))
                 .lastReadChapter(10)
                 .build();
 
-        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(UserEntity.builder().build()));
-        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
         when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(readingItemEntity));
         when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
 
-        service.addReadingProgress(toSaveProgress);
+        service.addReadingProgress(user, toSaveProgress);
 
         var captor = ArgumentCaptor.forClass(ReadingProgressEntity.class);
         verify(repository).save(captor.capture());
         ReadingProgressEntity savedEntity = captor.getValue();
         assertThat(savedEntity.getId()).isNull();
-        assertThat(savedEntity.getUser().getId()).isEqualTo(toSaveProgress.getUser().getId());
+        assertThat(savedEntity.getUser().getId()).isEqualTo(user.getId());
         assertThat(savedEntity.getReadingItem().getId()).isEqualTo(toSaveProgress.getReadingItem().getId());
+        assertThat(savedEntity.getReadingItem().getTitle()).isEqualTo(readingItemEntity.getTitle());
         assertThat(savedEntity.getLastReadChapter()).isEqualTo(toSaveProgress.getLastReadChapter());
     }
 
     @Test
     void addReadingProgress_returnsSavedReadingProgress() {
         var userId = 69L;
+        User user = User.builder().id(userId).build();
         var readingItemId = 1337L;
+        ReadingItemEntity readingItemEntity = testReadingItem(readingItemId);
         ReadingProgress toSaveProgress =
-                testReadingProgressBuilder().userId(userId).readingItemId(readingItemId).build();
+                testReadingProgressBuilder().readingItemId(readingItemId).build();
         ReadingProgressEntity savedEntity =
                 testReadingProgressEntityBuilder()
-                        .id(42L).userId(userId).readingItemId(readingItemId).build();
+                        .id(42L).userId(userId).readingItem(readingItemEntity).build();
 
-        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(UserEntity.builder().build()));
-        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
         when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(readingItemEntity));
         when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
 
         when(repository.save(any(ReadingProgressEntity.class)))
                 .thenReturn(savedEntity);
 
-        var result = service.addReadingProgress(toSaveProgress);
+        var result = service.addReadingProgress(user, toSaveProgress);
 
         assertReadingProgressMatchesEntity(result, savedEntity);
     }
 
     @Test
-    void addReadingProgress_withUnknownUser() {
-        var userId = 69L;
-        var readingItemId = 1337L;
-
-        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
-        when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(readingItemEntity));
-
-        assertThatThrownBy(() -> service.addReadingProgress(
-                testReadingProgressBuilder().userId(userId).readingItemId(readingItemId).build()))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("No user with id " + userId);
-    }
-
-    @Test
     void addReadingProgress_withUnknownReadingItem() {
         var userId = 69L;
+        User user = User.builder().id(userId).build();
         var readingItemId = 1337L;
 
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(UserEntity.builder().build()));
 
-        assertThatThrownBy(() -> service.addReadingProgress(
-                testReadingProgressBuilder().userId(userId).readingItemId(readingItemId).build()))
+        assertThatThrownBy(() ->
+                service.addReadingProgress(user, testReadingProgressBuilder().readingItemId(readingItemId).build()))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("No reading item with id " + readingItemId);
     }
@@ -130,17 +117,18 @@ class ReadingProgressServiceTest {
     @Test
     void addReadingProgress_withExistingUserAndReadingItemCombination_throwsAlreadyExistsException() {
         var userId = 69L;
+        User user = User.builder().id(userId).build();
         var readingItemId = 1337L;
+        ReadingItemEntity readingItemEntity = testReadingItem(readingItemId);
 
         when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(UserEntity.builder().build()));
-        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
         when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(readingItemEntity));
 
         when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.of(testReadingProgressEntityBuilder().build()));
 
-        assertThatThrownBy(() -> service.addReadingProgress(
-                testReadingProgressBuilder().userId(userId).readingItemId(readingItemId).build()))
+        assertThatThrownBy(() ->
+                service.addReadingProgress(user, testReadingProgressBuilder().readingItemId(readingItemId).build()))
                 .isInstanceOf(AlreadyExistsException.class)
                 .hasMessage(
                         "Reading progress for user " + userId + " and reading item " + readingItemId + " already " +
@@ -150,10 +138,10 @@ class ReadingProgressServiceTest {
     @Test
     void addReadingProgress_withExistingUserAndReadingItemCombination_duringSave_throwsAlreadyExistsException() {
         var userId = 69L;
+        User user = User.builder().id(userId).build();
         var readingItemId = 1337L;
+        ReadingItemEntity readingItemEntity = testReadingItem(readingItemId);
 
-        when(userRepository.findById(any(Long.class))).thenReturn(Optional.of(UserEntity.builder().build()));
-        ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
         when(readingItemRepository.findById(any(Long.class))).thenReturn(Optional.of(readingItemEntity));
         when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
         when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class))).thenReturn(Optional.empty());
@@ -161,8 +149,8 @@ class ReadingProgressServiceTest {
         when(repository.save(any(ReadingProgressEntity.class)))
                 .thenThrow(new DataIntegrityViolationException(ReadingProgressEntity.UNIQUE_USER_READING_ITEM));
 
-        assertThatThrownBy(() -> service.addReadingProgress(
-                testReadingProgressBuilder().userId(userId).readingItemId(readingItemId).build()))
+        assertThatThrownBy(() ->
+                service.addReadingProgress(user, testReadingProgressBuilder().readingItemId(readingItemId).build()))
                 .isInstanceOf(AlreadyExistsException.class)
                 .hasMessage(
                         "Reading progress for user " + userId + " and reading item " + readingItemId + " already " +
@@ -170,75 +158,35 @@ class ReadingProgressServiceTest {
     }
 
     @Test
-    void getReadingProgress_withId_findsReadingProgressById() {
+    void getReadingProgress_findsReadingProgressByUserIdAndReadingItemId() {
+        User user = User.builder().id(69L).build();
+        Long readingItemId = 666L;
         ReadingProgressEntity entity =
-                testReadingProgressEntityBuilder().id(1L).userId(69L).readingItemId(666L).build();
-
-        when(repository.findById(any(Long.class)))
-                .thenReturn(Optional.of(entity));
-
-        service.getReadingProgress(1L);
-
-        var captor = ArgumentCaptor.forClass(Long.class);
-        verify(repository).findById(captor.capture());
-        assertThat(captor.getValue()).isEqualTo(1L);
-    }
-
-    @Test
-    void getReadingProgress_withId_returnsReadingProgress() {
-        ReadingProgressEntity entity =
-                testReadingProgressEntityBuilder().id(1L).userId(69L).readingItemId(666L).build();
-
-        when(repository.findById(any(Long.class)))
-                .thenReturn(Optional.of(entity));
-
-        var result = service.getReadingProgress(1L);
-
-        assertReadingProgressMatchesEntity(result, entity);
-    }
-
-    @Test
-    void getReadingProgress_withUnknownId_throwsNotFoundException() {
-        var id = 42L;
-
-        when(repository.findById(any(Long.class)))
-                .thenReturn(Optional.empty());
-
-        assertThatThrownBy(() -> service.getReadingProgress(id))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("No reading progress with id " + id);
-    }
-
-    @Test
-    void getReadingProgress_withUserAndReadingItem_findsReadingProgressByUserAndReadingItem() {
-        var user = User.builder().id(69L).build();
-        var readingItem = ReadingItem.builder().id(666L).build();
-        ReadingProgressEntity entity =
-                testReadingProgressEntityBuilder().id(1L).userId(69L).readingItemId(666L).build();
+                testReadingProgressEntityBuilder().id(1L).userId(69L).readingItemId(readingItemId).build();
 
         when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.of(entity));
 
-        service.getReadingProgress(user, readingItem);
+        service.getReadingProgress(user, readingItemId);
 
         var userCaptor = ArgumentCaptor.forClass(Long.class);
         var readingItemCaptor = ArgumentCaptor.forClass(Long.class);
         verify(repository).findByUserIdAndReadingItemId(userCaptor.capture(), readingItemCaptor.capture());
         assertThat(userCaptor.getValue()).isEqualTo(user.getId());
-        assertThat(readingItemCaptor.getValue()).isEqualTo(readingItem.getId());
+        assertThat(readingItemCaptor.getValue()).isEqualTo(readingItemId);
     }
 
     @Test
-    void getReadingProgress_withUserAndReadingItem_returnsReadingProgress() {
-        var user = User.builder().id(69L).build();
-        var readingItem = ReadingItem.builder().id(666L).build();
+    void getReadingProgress_returnsReadingProgress() {
+        User user = User.builder().id(69L).build();
+        Long readingItemId = 666L;
         ReadingProgressEntity entity =
-                testReadingProgressEntityBuilder().id(1L).userId(69L).readingItemId(666L).build();
+                testReadingProgressEntityBuilder().id(1L).userId(69L).readingItemId(readingItemId).build();
 
         when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.of(entity));
 
-        var result = service.getReadingProgress(user, readingItem);
+        var result = service.getReadingProgress(user, readingItemId);
 
         assertReadingProgressMatchesEntity(result, entity);
     }
@@ -246,15 +194,15 @@ class ReadingProgressServiceTest {
     @Test
     void getReadingProgress_withUnknownUserAndReadingItemCombination_throwsNotFoundException() {
         var user = User.builder().id(9999L).build();
-        var readingItem = ReadingItem.builder().id(99999L).build();
+        Long readingItemId = 666L;
 
         when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.getReadingProgress(user, readingItem))
+        assertThatThrownBy(() -> service.getReadingProgress(user, readingItemId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage(
-                        "No reading progress for user " + user.getId() + " and reading item " + readingItem.getId());
+                        "No reading progress for user " + user.getId() + " and reading item " + readingItemId);
     }
 
     @Test
@@ -275,7 +223,8 @@ class ReadingProgressServiceTest {
 
     @Test
     void updateReadingProgress_appliesChanges() {
-        var id = 42L;
+        User user = User.builder().id(69L).build();
+        Long readingItemId = 666L;
         ReadingProgressEntity originalEntity =
                 testReadingProgressEntityBuilder()
                         .lastReadChapter(10)
@@ -285,12 +234,12 @@ class ReadingProgressServiceTest {
                         .lastReadChapter(12)
                         .build();
 
-        when(repository.findById(any(Long.class)))
+        when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.of(originalEntity));
         ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
         when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
 
-        service.updateReadingProgress(id, updateMask);
+        service.updateReadingProgress(user, readingItemId, updateMask);
 
         var captor = ArgumentCaptor.forClass(ReadingProgressEntity.class);
         verify(repository).save(captor.capture());
@@ -303,7 +252,8 @@ class ReadingProgressServiceTest {
 
     @Test
     void updateReadingProgress_returnsNewlySavedReadingProgress() {
-        var id = 42L;
+        User user = User.builder().id(69L).build();
+        Long readingItemId = 666L;
         ReadingProgressEntity originalEntity =
                 testReadingProgressEntityBuilder()
                         .lastReadChapter(10)
@@ -317,41 +267,44 @@ class ReadingProgressServiceTest {
                         .lastReadChapter(12)
                         .build();
 
-        when(repository.findById(any(Long.class)))
+        when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.of(originalEntity));
         when(repository.save(any(ReadingProgressEntity.class)))
                 .thenReturn(updatedEntity);
         ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
         when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
 
-        var result = service.updateReadingProgress(id, updateMask);
+        var result = service.updateReadingProgress(user, readingItemId, updateMask);
 
         assertReadingProgressMatchesEntity(result, updatedEntity);
     }
 
     @Test
     void updateReadingProgress_withUnknownId_throwsNotFoundException() {
-        var id = 42L;
+        User user = User.builder().id(69L).build();
+        Long readingItemId = 666L;
 
-        when(repository.findById(any(Long.class)))
+        when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.updateReadingProgress(id, testReadingProgressBuilder().build()))
+        assertThatThrownBy(() -> service.updateReadingProgress(user, readingItemId, testReadingProgressBuilder().build()))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("No reading progress with id " + id);
+                .hasMessage(
+                        "No reading progress for user " + user.getId() + " and reading item " + readingItemId);
     }
 
     @Test
     void deleteReadingProgress_deletesReadingProgress() {
-        var id = 42L;
+        User user = User.builder().id(69L).build();
+        Long readingItemId = 666L;
         ReadingProgressEntity deletedEntity = testReadingProgressEntityBuilder().build();
 
-        when(repository.findById(any(Long.class)))
+        when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.of(deletedEntity));
         ReadingItemEntity readingItemEntity = ReadingItemEntity.builder().build();
         when(entityManager.find(eq(ReadingItemEntity.class), any(Long.class))).thenReturn(readingItemEntity);
 
-        service.deleteReadingProgress(id);
+        service.deleteReadingProgress(user, readingItemId);
 
         var captor = ArgumentCaptor.forClass(ReadingProgressEntity.class);
         verify(repository).delete(captor.capture());
@@ -360,14 +313,24 @@ class ReadingProgressServiceTest {
 
     @Test
     void deleteReadingProgress_withUnknownId_throwsNotFoundException() {
-        var id = 42L;
+        User user = User.builder().id(69L).build();
+        Long readingItemId = 666L;
 
-        when(repository.findById(any(Long.class)))
+        when(repository.findByUserIdAndReadingItemId(any(Long.class), any(Long.class)))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> service.deleteReadingProgress(id))
+        assertThatThrownBy(() -> service.deleteReadingProgress(user, readingItemId))
                 .isInstanceOf(NotFoundException.class)
-                .hasMessage("No reading progress with id " + id);
+                .hasMessage(
+                        "No reading progress for user " + user.getId() + " and reading item " + readingItemId);
+    }
+
+    private static ReadingItemEntity testReadingItem(long readingItemId) {
+        return ReadingItemEntity.builder()
+                .id(readingItemId)
+                .title("Reading Item")
+                .author("Author")
+                .build();
     }
 
     private static void assertReadingProgressMatchesEntity(
@@ -375,6 +338,8 @@ class ReadingProgressServiceTest {
         assertThat(readingProgress.getId()).isEqualTo(entity.getId());
         assertThat(readingProgress.getUser().getId()).isEqualTo(entity.getUser().getId());
         assertThat(readingProgress.getReadingItem().getId()).isEqualTo(entity.getReadingItem().getId());
+        assertThat(readingProgress.getReadingItem().getTitle()).isEqualTo(entity.getReadingItem().getTitle());
+        assertThat(readingProgress.getReadingItem().getAuthor()).isEqualTo(entity.getReadingItem().getAuthor());
         assertThat(readingProgress.getLastReadChapter()).isEqualTo(entity.getLastReadChapter());
     }
 }

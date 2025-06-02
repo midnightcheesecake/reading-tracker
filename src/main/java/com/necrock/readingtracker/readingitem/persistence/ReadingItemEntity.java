@@ -99,8 +99,14 @@ public class ReadingItemEntity {
         progressSet.remove(progress.getId());
     }
 
-    public boolean containsProgress(ReadingProgressEntity progress) {
-        return progressSet.containsKey(progress.getId());
+    public Builder toBuilder() {
+        return new Builder()
+                .id(id)
+                .title(title)
+                .type(type)
+                .author(author)
+                .totalChapters(totalChapters)
+                .createdAt(createdAt);
     }
 
     @Override

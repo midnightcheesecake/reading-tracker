@@ -1,9 +1,9 @@
 package com.necrock.readingtracker.readingitem.api;
 
 import com.google.common.collect.ImmutableList;
-import com.necrock.readingtracker.readingitem.api.dto.CreateReadingItemDto;
+import com.necrock.readingtracker.readingitem.api.dto.CreateReadingItemRequest;
 import com.necrock.readingtracker.readingitem.api.dto.ReadingItemDetailsDto;
-import com.necrock.readingtracker.readingitem.api.dto.UpdateReadingItemDto;
+import com.necrock.readingtracker.readingitem.api.dto.UpdateReadingItemRequest;
 import com.necrock.readingtracker.readingitem.service.ReadingItemService;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -46,13 +46,15 @@ public class ReadingItemController {
 
     @PostMapping
     @ResponseStatus(CREATED)
-    public ReadingItemDetailsDto addItem(@Valid @RequestBody CreateReadingItemDto item) {
-        return mapper.toDetailsDto(service.addReadingItem(mapper.toDomainModel(item)));
+    public ReadingItemDetailsDto addItem(@Valid @RequestBody CreateReadingItemRequest request) {
+        return mapper.toDetailsDto(service.addReadingItem(mapper.toDomainModel(request)));
     }
 
     @PatchMapping("/{id}")
-    public ReadingItemDetailsDto updateItem(@PathVariable Long id, @Valid @RequestBody UpdateReadingItemDto item) {
-        return mapper.toDetailsDto(service.updateReadingItem(id, mapper.toDomainModel(item)));
+    public ReadingItemDetailsDto updateItem(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateReadingItemRequest request) {
+        return mapper.toDetailsDto(service.updateReadingItem(id, mapper.toDomainModel(request)));
     }
 
     @DeleteMapping("/{id}")

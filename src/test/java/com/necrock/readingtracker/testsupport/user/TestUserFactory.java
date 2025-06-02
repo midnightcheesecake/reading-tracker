@@ -13,15 +13,15 @@ import java.time.Instant;
 
 public class TestUserFactory {
 
-    private final UserRepository userRepository;
+    private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final Clock clock;
 
     private TestUserFactory(
-            UserRepository userRepository,
+            UserRepository repository,
             PasswordEncoder passwordEncoder,
             Clock clock) {
-        this.userRepository = userRepository;
+        this.repository = repository;
         this.passwordEncoder = passwordEncoder;
         this.clock = clock;
     }
@@ -35,7 +35,7 @@ public class TestUserFactory {
     }
 
     public UserEntity createUser(String username, UserRole role, UserStatus status) {
-        var maybeUser = userRepository.findByUsername(username);
+        var maybeUser = repository.findByUsername(username);
         return maybeUser.map(userEntity -> overrideExistingUser(userEntity, role, status))
                 .orElseGet(() -> createNewUser(username, role, status));
     }
@@ -49,7 +49,7 @@ public class TestUserFactory {
                 .status(status)
                 .createdAt(Instant.now(clock))
                 .build();
-        return userRepository.save(user);
+        return repository.save(user);
     }
 
     private UserEntity overrideExistingUser(UserEntity existingUser, UserRole role, UserStatus status) {
@@ -62,17 +62,17 @@ public class TestUserFactory {
                 .status(status)
                 .createdAt(existingUser.getCreatedAt())
                 .build();
-        return userRepository.save(user);
+        return repository.save(user);
     }
 
     @TestConfiguration
     public static class Config {
         @Bean
         public TestUserFactory testUserFactory(
-                UserRepository userRepository,
+                UserRepository repository,
                 PasswordEncoder passwordEncoder,
                 Clock clock) {
-            return new TestUserFactory(userRepository, passwordEncoder, clock);
+            return new TestUserFactory(repository, passwordEncoder, clock);
         }
     }
 }

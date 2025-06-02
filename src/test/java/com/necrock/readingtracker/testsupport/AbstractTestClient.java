@@ -1,5 +1,6 @@
 package com.necrock.readingtracker.testsupport;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.necrock.readingtracker.security.service.JwtService;
 import com.necrock.readingtracker.testsupport.user.TestUserFactory;
@@ -89,6 +90,11 @@ public abstract class AbstractTestClient<T extends AbstractTestClient<T>> {
     }
 
     public <R> R parseResponse(ResultActions resultActions, Class<R> responseType) throws Exception {
+        String content = resultActions.andReturn().getResponse().getContentAsString();
+        return objectMapper.readValue(content, responseType);
+    }
+
+    public <R> R parseResponse(ResultActions resultActions, TypeReference<R> responseType) throws Exception {
         String content = resultActions.andReturn().getResponse().getContentAsString();
         return objectMapper.readValue(content, responseType);
     }
